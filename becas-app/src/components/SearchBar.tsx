@@ -1,16 +1,15 @@
 "use client";
 
+import { Suspense } from "react";
 import { Search } from "lucide-react";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
-//import { useDebouncedCallback } from "use-debounce"; // Opcional, pero recomendado para pro
-// Si no querés instalar use-debounce, lo hacemos manual. Hagámoslo manual simple primero.
 
-export default function SearchBar() {
+// Inner component that uses useSearchParams
+function SearchBarContent() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { replace } = useRouter();
 
-  // Esta función se ejecuta cada vez que escribís
   const handleSearch = (term: string) => {
     const params = new URLSearchParams(searchParams);
     
@@ -20,8 +19,6 @@ export default function SearchBar() {
       params.delete('search');
     }
 
-    // Actualizamos la URL sin recargar la página
-    // Ejemplo: / -> /?search=python
     replace(`${pathname}?${params.toString()}`);
   }
 
@@ -35,5 +32,28 @@ export default function SearchBar() {
         defaultValue={searchParams.get('search')?.toString()}
       />
     </div>
+  );
+}
+
+// Loading fallback for Suspense
+function SearchBarFallback() {
+  return (
+    <div className="relative flex items-center w-full max-w-md bg-gray-100 rounded-full px-4 py-2 mx-auto">
+      <Search className="text-gray-400 w-5 h-5 mr-3" />
+      <input
+        className="bg-transparent border-none outline-none w-full text-sm text-gray-700 placeholder-gray-500"
+        placeholder="Buscar becas, países..."
+        disabled
+      />
+    </div>
+  );
+}
+
+// Main component wrapped in Suspense
+export default function SearchBar() {
+  return (
+    <Suspense fallback={<SearchBarFallback />}>
+      <SearchBarContent />
+    </Suspense>
   );
 }

@@ -1,10 +1,12 @@
 "use client";
 
+import { Suspense } from "react";
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { GraduationCap, LogIn, AlertCircle, Eye, EyeOff } from "lucide-react";
 
-export default function AdminLogin() {
+// Inner component that uses useSearchParams
+function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [username, setUsername] = useState("");
@@ -41,6 +43,87 @@ export default function AdminLogin() {
   };
 
   return (
+    <form onSubmit={handleSubmit} className="space-y-5">
+      {error && (
+        <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-lg flex items-center gap-3">
+          <AlertCircle size={20} className="text-red-500 flex-shrink-0" />
+          <span className="text-red-800 font-medium">{error}</span>
+        </div>
+      )}
+
+      <div>
+        <label className="block text-sm font-semibold text-gray-700 mb-2">
+          Usuario
+        </label>
+        <input
+          type="text"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          className="w-full px-4 py-3.5 bg-gray-50 border-2 border-gray-200 rounded-xl 
+                   text-gray-900 placeholder-gray-400
+                   focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 
+                   transition-all duration-200 outline-none"
+          placeholder="Ingresa tu usuario"
+          required
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-semibold text-gray-700 mb-2">
+          Contraseña
+        </label>
+        <div className="relative">
+          <input
+            type={showPassword ? "text" : "password"}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full px-4 py-3.5 bg-gray-50 border-2 border-gray-200 rounded-xl 
+                     text-gray-900 placeholder-gray-400
+                     focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 
+                     transition-all duration-200 outline-none pr-12"
+            placeholder="Ingresa tu contraseña"
+            required
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+          </button>
+        </div>
+      </div>
+
+      <button
+        type="submit"
+        disabled={loading}
+        className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 
+                 hover:from-emerald-700 hover:to-teal-700
+                 text-white font-bold py-4 px-6 rounded-xl 
+                 transition-all duration-200 
+                 flex items-center justify-center gap-3 
+                 disabled:opacity-50 disabled:cursor-not-allowed
+                 shadow-lg shadow-emerald-500/25 hover:shadow-xl hover:shadow-emerald-500/30
+                 active:scale-[0.98]"
+      >
+        {loading ? (
+          <div className="flex items-center gap-3">
+            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            <span>Ingresando...</span>
+          </div>
+        ) : (
+          <>
+            <LogIn size={20} />
+            <span>Ingresar al Panel</span>
+          </>
+        )}
+      </button>
+    </form>
+  );
+}
+
+export default function AdminLogin() {
+  return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-900 via-teal-900 to-cyan-900 flex items-center justify-center p-4">
       {/* Background pattern */}
       <div className="absolute inset-0 opacity-10">
@@ -65,82 +148,9 @@ export default function AdminLogin() {
             Bienvenido
           </h2>
 
-          {error && (
-            <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-lg flex items-center gap-3">
-              <AlertCircle size={20} className="text-red-500 flex-shrink-0" />
-              <span className="text-red-800 font-medium">{error}</span>
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Usuario
-              </label>
-              <input
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className="w-full px-4 py-3.5 bg-gray-50 border-2 border-gray-200 rounded-xl 
-                         text-gray-900 placeholder-gray-400
-                         focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 
-                         transition-all duration-200 outline-none"
-                placeholder="Ingresa tu usuario"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Contraseña
-              </label>
-              <div className="relative">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-3.5 bg-gray-50 border-2 border-gray-200 rounded-xl 
-                           text-gray-900 placeholder-gray-400
-                           focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 
-                           transition-all duration-200 outline-none pr-12"
-                  placeholder="Ingresa tu contraseña"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                >
-                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                </button>
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 
-                       hover:from-emerald-700 hover:to-teal-700
-                       text-white font-bold py-4 px-6 rounded-xl 
-                       transition-all duration-200 
-                       flex items-center justify-center gap-3 
-                       disabled:opacity-50 disabled:cursor-not-allowed
-                       shadow-lg shadow-emerald-500/25 hover:shadow-xl hover:shadow-emerald-500/30
-                       active:scale-[0.98]"
-            >
-              {loading ? (
-                <div className="flex items-center gap-3">
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  <span>Ingresando...</span>
-                </div>
-              ) : (
-                <>
-                  <LogIn size={20} />
-                  <span>Ingresar al Panel</span>
-                </>
-              )}
-            </button>
-          </form>
+          <Suspense fallback={<div className="text-center text-gray-500">Cargando...</div>}>
+            <LoginForm />
+          </Suspense>
         </div>
 
         <p className="text-center text-emerald-200/60 mt-8 text-sm">
