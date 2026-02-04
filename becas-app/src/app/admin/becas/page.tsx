@@ -4,6 +4,8 @@ import prisma from "@/lib/prisma";
 import Link from "next/link";
 import { Plus, Search, ExternalLink } from "lucide-react";
 
+export const dynamic = 'force-dynamic';
+
 async function getScholarships(searchParams: { status?: string; search?: string }) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const where: any = {};

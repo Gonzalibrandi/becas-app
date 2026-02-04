@@ -3,6 +3,8 @@ import ScholarshipForm from "@/components/admin/ScholarshipForm";
 import prisma from "@/lib/prisma";
 import { notFound } from "next/navigation";
 
+export const dynamic = 'force-dynamic';
+
 async function getScholarship(id: string) {
   const scholarship = await prisma.scholarship.findUnique({
     where: { id },

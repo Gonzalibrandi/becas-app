@@ -4,6 +4,8 @@ import prisma from "@/lib/prisma";
 import { GraduationCap, Clock, CheckCircle, Archive, FileEdit, TrendingUp, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
+export const dynamic = 'force-dynamic';
+
 async function getStats() {
   try {
     const [draft, review, published, archived, total] = await Promise.all([

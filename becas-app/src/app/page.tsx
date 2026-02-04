@@ -3,6 +3,9 @@ import prisma from "@/lib/prisma";
 import { Calendar, MapPin, GraduationCap, ArrowRight } from "lucide-react";
 import ScholarshipFilters from "@/components/ScholarshipFilters";
 
+// Force dynamic rendering - page fetches from database
+export const dynamic = 'force-dynamic';
+
 type FilterParams = {
   search?: string;
   country?: string;

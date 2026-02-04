@@ -16,6 +16,9 @@ import {
   Heart
 } from "lucide-react";
 
+// Force dynamic rendering - page fetches from database
+export const dynamic = 'force-dynamic';
+
 // Fetch scholarship directly from Prisma by slug
 async function getScholarship(slug: string) {
   try {
