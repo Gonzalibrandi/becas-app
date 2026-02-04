@@ -1,0 +1,49 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Scholarship model - clean version without Django legacy
+model Scholarship {
+  id             String    @id @default(uuid())
+  slug           String    @unique
+  
+  // Main content
+  title          String
+  description    String    @default("")
+  
+  // URLs
+  applyUrl       String?   @map("apply_url")
+  officialUrl    String?   @map("official_url")
+  sourceUrl      String    @map("source_url")
+  
+  // Key data
+  country        String
+  deadline       DateTime?
+  startDate      DateTime? @map("start_date")
+  
+  // Classification
+  fundingType    String    @default("UNKNOWN") @map("funding_type")
+  educationLevel String    @default("OTHER") @map("education_level")
+  
+  // Rich content
+  areas          String    @default("")
+  benefits       String    @default("")
+  requirements   String    @default("")
+  duracion       String    @default("")
+  
+  // Admin
+  status         String    @default("DRAFT")
+  rawData        String    @default("{}") @map("raw_data")
+  adminNotes     String?   @map("admin_notes")
+  
+  // Timestamps
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  @@map("scholarships")
+}
