@@ -19,20 +19,37 @@
   }
 }
 
-/* Base styles - smaller text for better density */
+/* 
+ * Responsive font sizing for ultra-compact UI (80% scale)
+ * Mobile: 10px 
+ * Tablet: 10.5px 
+ * Desktop: 10.5px
+ */
 html {
-  font-size: 14px; /* Reduced from default 16px */
+  font-size: 10px;
+}
+
+@media (min-width: 640px) {
+  html {
+    font-size: 10px;
+  }
 }
 
 @media (min-width: 768px) {
   html {
-    font-size: 15px;
+    font-size: 10.5px;
   }
 }
 
 @media (min-width: 1024px) {
   html {
-    font-size: 16px;
+    font-size: 10.5px;
+  }
+}
+
+@media (min-width: 1280px) {
+  html {
+    font-size: 10.5px;
   }
 }
 
@@ -40,4 +57,11 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Compact utility classes */
+.compact-text {
+  letter-spacing: -0.01em;
 }

@@ -80,12 +80,12 @@ export default async function AdminDashboard() {
 
   return (
     <AdminLayout>
-      <div className="space-y-8">
+      <div className="space-y-5">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-            <p className="text-gray-500 mt-1">Resumen del sistema de becas</p>
+            <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+            <p className="text-gray-500 text-sm mt-0.5">Resumen del sistema de becas</p>
           </div>
           <Link
             href="/admin/becas"
@@ -97,19 +97,19 @@ export default async function AdminDashboard() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {statCards.map((card) => (
             <div 
               key={card.label} 
-              className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100 hover:shadow-md transition-shadow"
+              className="bg-white rounded-xl shadow-sm p-4 border border-gray-100 hover:shadow-md transition-shadow"
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-500">{card.label}</p>
-                  <p className="text-4xl font-bold text-gray-900 mt-2">{card.value}</p>
+                  <p className="text-xs font-medium text-gray-500">{card.label}</p>
+                  <p className="text-2xl font-bold text-gray-900 mt-1">{card.value}</p>
                 </div>
-                <div className={`w-14 h-14 rounded-2xl ${card.bgLight} flex items-center justify-center`}>
-                  <card.icon className={card.textColor} size={26} />
+                <div className={`w-10 h-10 rounded-xl ${card.bgLight} flex items-center justify-center`}>
+                  <card.icon className={card.textColor} size={20} />
                 </div>
               </div>
             </div>
@@ -117,35 +117,35 @@ export default async function AdminDashboard() {
         </div>
 
         {/* Total Card */}
-        <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 rounded-2xl shadow-xl p-8 text-white relative overflow-hidden">
+        <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 rounded-xl shadow-xl p-5 text-white relative overflow-hidden">
           <div className="absolute inset-0 opacity-10">
-            <div className="absolute -right-10 -top-10 w-40 h-40 bg-white rounded-full" />
-            <div className="absolute -left-10 -bottom-10 w-32 h-32 bg-white rounded-full" />
+            <div className="absolute -right-10 -top-10 w-32 h-32 bg-white rounded-full" />
+            <div className="absolute -left-10 -bottom-10 w-24 h-24 bg-white rounded-full" />
           </div>
-          <div className="flex items-center gap-6 relative z-10">
-            <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
-              <GraduationCap size={40} />
+          <div className="flex items-center gap-4 relative z-10">
+            <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+              <GraduationCap size={28} />
             </div>
             <div>
-              <p className="text-emerald-100 text-lg font-medium flex items-center gap-2">
-                <TrendingUp size={18} />
+              <p className="text-emerald-100 text-sm font-medium flex items-center gap-2">
+                <TrendingUp size={14} />
                 Total de Becas
               </p>
-              <p className="text-5xl font-bold mt-1">{stats.total}</p>
+              <p className="text-3xl font-bold mt-0.5">{stats.total}</p>
             </div>
           </div>
         </div>
 
         {/* Recent Scholarships */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
-            <h2 className="text-xl font-bold text-gray-900">Becas Recientes</h2>
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+            <h2 className="text-base font-bold text-gray-900">Becas Recientes</h2>
             <Link 
               href="/admin/becas"
-              className="text-emerald-600 hover:text-emerald-700 font-semibold text-sm flex items-center gap-1 transition-colors"
+              className="text-emerald-600 hover:text-emerald-700 font-medium text-xs flex items-center gap-1 transition-colors"
             >
               Ver todas
-              <ArrowRight size={16} />
+              <ArrowRight size={14} />
             </Link>
           </div>
           <div className="divide-y divide-gray-50">

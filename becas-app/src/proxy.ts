@@ -3,7 +3,7 @@ import type { NextRequest } from 'next/server'
 
 const SESSION_COOKIE = 'admin_session'
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname, method } = { pathname: request.nextUrl.pathname, method: request.method }
   
   // Protected API routes that require authentication
