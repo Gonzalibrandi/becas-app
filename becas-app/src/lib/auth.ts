@@ -1,13 +1,36 @@
 import { cookies } from 'next/headers'
+import bcrypt from 'bcryptjs'
+import prisma from '@/lib/prisma'
 
-// Read credentials from environment variables
-const ADMIN_USER = process.env.ADMIN_USERNAME || 'admin'
-const ADMIN_PASS = process.env.ADMIN_PASSWORD || 'password'
 const SESSION_COOKIE = 'admin_session'
 const SESSION_VALUE = process.env.ADMIN_SESSION_SECRET || 'authenticated_session'
 
+// Validate credentials against database
 export async function validateCredentials(username: string, password: string): Promise<boolean> {
-  return username === ADMIN_USER && password === ADMIN_PASS
+  try {
+    const admin = await prisma.adminUser.findUnique({
+      where: { username, isActive: true },
+    })
+
+    if (!admin) {
+      return false
+    }
+
+    const isValid = await bcrypt.compare(password, admin.passwordHash)
+    
+    if (isValid) {
+      // Update last login timestamp
+      await prisma.adminUser.update({
+        where: { id: admin.id },
+        data: { lastLogin: new Date() },
+      })
+    }
+
+    return isValid
+  } catch (error) {
+    console.error('Error validating credentials:', error)
+    return false
+  }
 }
 
 export async function createSession(): Promise<void> {
@@ -49,3 +72,20 @@ export async function requireAuth(): Promise<{ authenticated: boolean; errorResp
   return { authenticated: true }
 }
 
+// Utility to hash a password (for creating admins)
+export async function hashPassword(password: string): Promise<string> {
+  return bcrypt.hash(password, 12)
+}
+
+// Utility to create an admin user (for initial setup or CLI)
+export async function createAdminUser(username: string, password: string, email?: string) {
+  const passwordHash = await hashPassword(password)
+  
+  return prisma.adminUser.create({
+    data: {
+      username,
+      passwordHash,
+      email,
+    },
+  })
+}
