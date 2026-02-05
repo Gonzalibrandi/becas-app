@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
 
     console.log(`🚀 Executing scraper: ${pythonCommand} ${scraperPath} ${url}`);
 
-    return new Promise((resolve) => {
+    return new Promise<NextResponse>((resolve) => {
       // Use env variable PYTHONIOENCODING to force UTF-8 output from Python
       const pythonProcess = spawn(pythonCommand, [scraperPath, url, '--json'], {
         env: { ...process.env, PYTHONIOENCODING: 'utf-8' }
