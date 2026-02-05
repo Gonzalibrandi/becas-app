@@ -94,26 +94,39 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     
-    // Map incoming snake_case to camelCase
+    // Helper to generate slug from title
+    const generateSlug = (title: string): string => {
+      const slug = title
+        .toLowerCase()
+        .normalize('NFKD')
+        .replace(/[\u0300-\u036f]/g, '') // Remove accents
+        .replace(/[^\w\s-]/g, '')
+        .trim()
+        .replace(/[\s_-]+/g, '-')
+        .slice(0, 80)
+      return `${slug}-${Date.now()}`
+    }
+    
+    // Accept both snake_case (from Python) and camelCase (from frontend)
     const data = {
-      slug: body.slug,
+      slug: body.slug || generateSlug(body.title || 'beca'),
       title: body.title,
       description: body.description || '',
-      applyUrl: body.apply_url || null,
-      officialUrl: body.official_url || null,
-      sourceUrl: body.source_url,
+      applyUrl: body.apply_url || body.applyUrl || null,
+      officialUrl: body.official_url || body.officialUrl || null,
+      sourceUrl: body.source_url || body.sourceUrl || '',
       country: body.country,
       deadline: body.deadline ? new Date(body.deadline) : null,
-      startDate: body.start_date ? new Date(body.start_date) : null,
-      fundingType: body.funding_type || 'UNKNOWN',
-      educationLevel: body.education_level || 'OTHER',
+      startDate: (body.start_date || body.startDate) ? new Date(body.start_date || body.startDate) : null,
+      fundingType: body.funding_type || body.fundingType || 'UNKNOWN',
+      educationLevel: body.education_level || body.educationLevel || 'OTHER',
       areas: body.areas || '',
       benefits: body.benefits || '',
       requirements: body.requirements || '',
-      duracion: body.duracion || '',
+      duracion: body.duracion || body.duration || '',
       status: body.status || 'DRAFT',
-      rawData: JSON.stringify(body.raw_data || {}),
-      adminNotes: body.admin_notes || null,
+      rawData: JSON.stringify(body.raw_data || body.rawData || {}),
+      adminNotes: body.admin_notes || body.adminNotes || null,
     }
     
     const scholarship = await prisma.scholarship.create({ data })

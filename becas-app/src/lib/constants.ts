@@ -30,9 +30,10 @@ export function getEducationInfo(level: string) {
 export type FundingType = typeof FUNDING_TYPES[number]['value'];
 export type EducationLevel = typeof EDUCATION_LEVELS[number]['value'];
 
-// Study areas for filtering
+// Study areas for filtering - must match Python scrapers/config.py
 export const STUDY_AREAS = [
   { value: "ENGINEERING", label: "Ingeniería y Tecnología", icon: "⚙️" },
+  { value: "TECHNOLOGY", label: "Informática y Computación", icon: "💻" },
   { value: "MEDICINE", label: "Medicina y Salud", icon: "🏥" },
   { value: "LAW", label: "Derecho", icon: "⚖️" },
   { value: "ARTS", label: "Artes y Humanidades", icon: "🎨" },
@@ -41,12 +42,14 @@ export const STUDY_AREAS = [
   { value: "BUSINESS", label: "Negocios y Economía", icon: "📊" },
   { value: "EDUCATION", label: "Educación", icon: "📚" },
   { value: "AGRICULTURE", label: "Agricultura y Medio Ambiente", icon: "🌱" },
+  { value: "LANGUAGES", label: "Idiomas", icon: "🗣️" },
+  { value: "ARCHITECTURE", label: "Arquitectura", icon: "🏛️" },
   { value: "ALL", label: "Todas las áreas", icon: "📋" },
 ] as const;
 
 // Helper to get study area info
 export function getStudyAreaInfo(area: string) {
-  return STUDY_AREAS.find(a => a.value === area) || STUDY_AREAS[9]; // Default to ALL
+  return STUDY_AREAS.find(a => a.value === area) || STUDY_AREAS[12]; // Default to ALL
 }
 
 export type StudyArea = typeof STUDY_AREAS[number]['value'];

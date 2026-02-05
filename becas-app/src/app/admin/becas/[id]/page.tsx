@@ -40,7 +40,7 @@ export default async function EditScholarshipPage({
           <p className="text-slate-600 mt-1">{scholarship.title}</p>
         </div>
         
-        <ScholarshipForm scholarship={scholarship} />
+        <ScholarshipForm initialData={scholarship} isEditing={true} />
       </div>
     </AdminLayout>
   );

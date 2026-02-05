@@ -8,7 +8,9 @@ import {
   LogOut, 
   Menu, 
   X,
-  ChevronRight
+  ChevronRight,
+  Plus,
+  User
 } from "lucide-react";
 import { useState } from "react";
 
@@ -26,6 +28,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const navItems = [
     { href: "/admin", icon: LayoutDashboard, label: "Dashboard" },
     { href: "/admin/becas", icon: GraduationCap, label: "Becas" },
+    { href: "/admin/becas/new", icon: Plus, label: "Nueva Beca" },
+    { href: "/admin/users", icon: User, label: "Usuarios" },
   ];
 
   return (
