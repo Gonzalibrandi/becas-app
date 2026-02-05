@@ -1,30 +1,13 @@
 "use client";
 
+import { Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Filter, X, ChevronDown } from "lucide-react";
+import { FUNDING_TYPES, EDUCATION_LEVELS } from "@/lib/constants";
 
-type FilterOptions = {
-  countries: string[];
-  fundingTypes: { value: string; label: string }[];
-  educationLevels: { value: string; label: string }[];
-};
-
-const defaultFundingTypes = [
-  { value: "FULL", label: "Cobertura Total" },
-  { value: "PARTIAL", label: "Parcial" },
-  { value: "ONE_TIME", label: "Pago Único" },
-];
-
-const defaultEducationLevels = [
-  { value: "UNDERGRADUATE", label: "Grado / Licenciatura" },
-  { value: "MASTER", label: "Maestría" },
-  { value: "PHD", label: "Doctorado" },
-  { value: "RESEARCH", label: "Investigación" },
-  { value: "SHORT_COURSE", label: "Curso Corto" },
-];
-
-export default function ScholarshipFilters({ countries }: { countries: string[] }) {
+// Inner component that uses useSearchParams
+function FiltersContent({ countries }: { countries: string[] }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   
@@ -40,11 +23,9 @@ export default function ScholarshipFilters({ countries }: { countries: string[] 
   const applyFilters = () => {
     const params = new URLSearchParams();
     
-    // Keep search if exists
     const search = searchParams.get("search");
     if (search) params.set("search", search);
     
-    // Add active filters
     if (filters.country) params.set("country", filters.country);
     if (filters.funding) params.set("funding", filters.funding);
     if (filters.level) params.set("level", filters.level);
@@ -63,6 +44,11 @@ export default function ScholarshipFilters({ countries }: { countries: string[] 
   const updateFilter = (key: string, value: string) => {
     setFilters({ ...filters, [key]: value });
   };
+
+  // Only show first 3 funding types (exclude UNKNOWN)
+  const fundingOptions = FUNDING_TYPES.slice(0, 3);
+  // Only show first 5 education levels (exclude OTHER)
+  const levelOptions = EDUCATION_LEVELS.slice(0, 5);
 
   return (
     <div className="relative">
@@ -96,7 +82,7 @@ export default function ScholarshipFilters({ countries }: { countries: string[] 
             onClick={() => setIsOpen(false)} 
           />
           
-          {/* Dropdown Panel - Full width on mobile, positioned on desktop */}
+          {/* Dropdown Panel */}
           <div className="fixed sm:absolute inset-x-4 sm:inset-x-auto sm:right-0 top-20 sm:top-full sm:mt-2 w-auto sm:w-96 bg-white rounded-2xl shadow-xl border border-gray-100 z-50 overflow-hidden max-h-[80vh] overflow-y-auto">
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b border-gray-100 bg-gray-50">
@@ -139,7 +125,7 @@ export default function ScholarshipFilters({ countries }: { countries: string[] 
                   className="w-full px-4 py-2.5 bg-gray-50 border-2 border-gray-200 rounded-xl text-gray-900 font-medium focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all"
                 >
                   <option value="">Todos los tipos</option>
-                  {defaultFundingTypes.map((type) => (
+                  {fundingOptions.map((type) => (
                     <option key={type.value} value={type.value}>{type.label}</option>
                   ))}
                 </select>
@@ -156,7 +142,7 @@ export default function ScholarshipFilters({ countries }: { countries: string[] 
                   className="w-full px-4 py-2.5 bg-gray-50 border-2 border-gray-200 rounded-xl text-gray-900 font-medium focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all"
                 >
                   <option value="">Todos los niveles</option>
-                  {defaultEducationLevels.map((level) => (
+                  {levelOptions.map((level) => (
                     <option key={level.value} value={level.value}>{level.label}</option>
                   ))}
                 </select>
@@ -182,5 +168,25 @@ export default function ScholarshipFilters({ countries }: { countries: string[] 
         </>
       )}
     </div>
+  );
+}
+
+// Fallback for Suspense
+function FiltersFallback() {
+  return (
+    <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium bg-white text-gray-600 border-2 border-gray-200">
+      <Filter size={18} />
+      <span className="hidden sm:inline">Filtros</span>
+      <ChevronDown size={16} />
+    </button>
+  );
+}
+
+// Main component wrapped in Suspense
+export default function ScholarshipFilters({ countries }: { countries: string[] }) {
+  return (
+    <Suspense fallback={<FiltersFallback />}>
+      <FiltersContent countries={countries} />
+    </Suspense>
   );
 }

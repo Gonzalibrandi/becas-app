@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import prisma from "@/lib/prisma";
+import { getFundingInfo, getEducationInfo } from "@/lib/constants";
 import { 
   ArrowLeft, 
   Calendar, 
@@ -29,29 +30,6 @@ async function getScholarship(slug: string) {
     console.error("Error fetching scholarship:", error);
     return null;
   }
-}
-
-// Helper functions for badges
-function getFundingInfo(type: string) {
-  const info: Record<string, { label: string; icon: string; style: string }> = {
-    FULL: { label: "Cobertura Total", icon: "💰", style: "bg-emerald-100 text-emerald-700 border-emerald-200" },
-    PARTIAL: { label: "Parcial", icon: "💵", style: "bg-amber-100 text-amber-700 border-amber-200" },
-    ONE_TIME: { label: "Pago Único", icon: "💸", style: "bg-blue-100 text-blue-700 border-blue-200" },
-    UNKNOWN: { label: "Ver detalles", icon: "❔", style: "bg-gray-100 text-gray-600 border-gray-200" },
-  };
-  return info[type] || info.UNKNOWN;
-}
-
-function getEducationInfo(level: string) {
-  const info: Record<string, { label: string; icon: string }> = {
-    UNDERGRADUATE: { label: "Grado / Licenciatura", icon: "🎓" },
-    MASTER: { label: "Maestría", icon: "📚" },
-    PHD: { label: "Doctorado", icon: "🔬" },
-    RESEARCH: { label: "Investigación", icon: "🧪" },
-    SHORT_COURSE: { label: "Curso Corto", icon: "📖" },
-    OTHER: { label: "Varios niveles", icon: "📄" },
-  };
-  return info[level] || info.OTHER;
 }
 
 export default async function ScholarshipPage({ params }: { params: Promise<{ slug: string }> }) {

@@ -1,10 +1,10 @@
 import { cookies } from 'next/headers'
 
-// Simple auth helpers with hardcoded credentials
-const ADMIN_USER = 'gonzalo'
-const ADMIN_PASS = 'librandi'
+// Read credentials from environment variables
+const ADMIN_USER = process.env.ADMIN_USERNAME || 'admin'
+const ADMIN_PASS = process.env.ADMIN_PASSWORD || 'password'
 const SESSION_COOKIE = 'admin_session'
-const SESSION_VALUE = 'authenticated_gonzalo_2026'
+const SESSION_VALUE = process.env.ADMIN_SESSION_SECRET || 'authenticated_session'
 
 export async function validateCredentials(username: string, password: string): Promise<boolean> {
   return username === ADMIN_USER && password === ADMIN_PASS
