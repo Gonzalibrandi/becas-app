@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
+import { requireAuth } from '@/lib/auth'
 
 // Force dynamic rendering - prevents build-time static analysis errors
 export const dynamic = 'force-dynamic'
 
-// GET /api/scholarships/[id] - Get single scholarship
+// GET /api/scholarships/[id] - Get single scholarship (public)
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -34,11 +35,17 @@ export async function GET(
   }
 }
 
-// PUT /api/scholarships/[id] - Update scholarship
+// PUT /api/scholarships/[id] - Update scholarship (protected)
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  // Verify authentication
+  const auth = await requireAuth()
+  if (!auth.authenticated) {
+    return auth.errorResponse
+  }
+
   const { id } = await params
   
   try {
@@ -79,11 +86,17 @@ export async function PUT(
   }
 }
 
-// DELETE /api/scholarships/[id] - Delete scholarship
+// DELETE /api/scholarships/[id] - Delete scholarship (protected)
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  // Verify authentication
+  const auth = await requireAuth()
+  if (!auth.authenticated) {
+    return auth.errorResponse
+  }
+
   const { id } = await params
   
   try {

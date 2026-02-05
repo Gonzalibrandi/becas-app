@@ -3,7 +3,7 @@ import { GraduationCap } from "lucide-react";
 import ScholarshipFilters from "@/components/ScholarshipFilters";
 import ScholarshipCard from "@/components/ScholarshipCard";
 import { Button, Card, Badge, SectionHeader, Title, Subtitle } from "@/components/ui";
-import { getFundingInfo, getEducationInfo } from "@/lib/constants";
+import { getFundingInfo, getEducationInfo, getStudyAreaInfo } from "@/lib/constants";
 
 // Force dynamic rendering - page fetches from database
 export const dynamic = 'force-dynamic';
@@ -13,6 +13,7 @@ type FilterParams = {
   country?: string;
   funding?: string;
   level?: string;
+  area?: string;
 };
 
 // Get unique countries for filter dropdown
@@ -50,6 +51,7 @@ async function getScholarships(filters: FilterParams) {
     if (filters.country) conditions.push({ country: filters.country });
     if (filters.funding) conditions.push({ fundingType: filters.funding });
     if (filters.level) conditions.push({ educationLevel: filters.level });
+    if (filters.area) conditions.push({ areas: { contains: filters.area } });
 
     return await prisma.scholarship.findMany({
       where: { AND: conditions },
@@ -62,6 +64,7 @@ async function getScholarships(filters: FilterParams) {
         fundingType: true,
         educationLevel: true,
         description: true,
+        areas: true,
       },
       orderBy: { deadline: "asc" },
     });
@@ -80,7 +83,7 @@ export default async function Home({
   const scholarships = await getScholarships(params);
   const countries = await getCountries();
   
-  const hasFilters = params.search || params.country || params.funding || params.level;
+  const hasFilters = params.search || params.country || params.funding || params.level || params.area;
 
   return (
     <div className="space-y-6 sm:space-y-8">
@@ -113,6 +116,11 @@ export default async function Home({
           {params.level && (
             <Badge color="purple" icon={getEducationInfo(params.level).icon}>
               {getEducationInfo(params.level).label}
+            </Badge>
+          )}
+          {params.area && (
+            <Badge color="blue" icon={getStudyAreaInfo(params.area).icon}>
+              {getStudyAreaInfo(params.area).label}
             </Badge>
           )}
         </div>

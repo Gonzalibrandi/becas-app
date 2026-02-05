@@ -31,3 +31,21 @@ export async function isAuthenticated(): Promise<boolean> {
   const session = cookieStore.get(SESSION_COOKIE)
   return session?.value === SESSION_VALUE
 }
+
+// Helper for API routes - returns error response if not authenticated
+export async function requireAuth(): Promise<{ authenticated: boolean; errorResponse?: Response }> {
+  const authenticated = await isAuthenticated()
+  
+  if (!authenticated) {
+    return {
+      authenticated: false,
+      errorResponse: new Response(
+        JSON.stringify({ error: 'No autorizado. Inicia sesión como administrador.' }),
+        { status: 401, headers: { 'Content-Type': 'application/json' } }
+      )
+    }
+  }
+  
+  return { authenticated: true }
+}
+

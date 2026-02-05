@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { Filter, X, ChevronDown } from "lucide-react";
-import { FUNDING_TYPES, EDUCATION_LEVELS } from "@/lib/constants";
+import { FUNDING_TYPES, EDUCATION_LEVELS, STUDY_AREAS } from "@/lib/constants";
 
 // Inner component that uses useSearchParams
 function FiltersContent({ countries }: { countries: string[] }) {
@@ -16,6 +16,7 @@ function FiltersContent({ countries }: { countries: string[] }) {
     country: searchParams.get("country") || "",
     funding: searchParams.get("funding") || "",
     level: searchParams.get("level") || "",
+    area: searchParams.get("area") || "",
   });
 
   const activeFiltersCount = Object.values(filters).filter(Boolean).length;
@@ -29,13 +30,14 @@ function FiltersContent({ countries }: { countries: string[] }) {
     if (filters.country) params.set("country", filters.country);
     if (filters.funding) params.set("funding", filters.funding);
     if (filters.level) params.set("level", filters.level);
+    if (filters.area) params.set("area", filters.area);
     
     router.push(`/?${params.toString()}`);
     setIsOpen(false);
   };
 
   const clearFilters = () => {
-    setFilters({ country: "", funding: "", level: "" });
+    setFilters({ country: "", funding: "", level: "", area: "" });
     const search = searchParams.get("search");
     router.push(search ? `/?search=${search}` : "/");
     setIsOpen(false);
@@ -49,6 +51,8 @@ function FiltersContent({ countries }: { countries: string[] }) {
   const fundingOptions = FUNDING_TYPES.slice(0, 3);
   // Only show first 5 education levels (exclude OTHER)
   const levelOptions = EDUCATION_LEVELS.slice(0, 5);
+  // Only show first 9 areas (exclude ALL)
+  const areaOptions = STUDY_AREAS.slice(0, 9);
 
   return (
     <div className="relative">
@@ -110,6 +114,23 @@ function FiltersContent({ countries }: { countries: string[] }) {
                   <option value="">Todos los países</option>
                   {countries.map((country) => (
                     <option key={country} value={country}>{country}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Study Area - NEW */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Área de estudio
+                </label>
+                <select
+                  value={filters.area}
+                  onChange={(e) => updateFilter("area", e.target.value)}
+                  className="w-full px-4 py-2.5 bg-gray-50 border-2 border-gray-200 rounded-xl text-gray-900 font-medium focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all"
+                >
+                  <option value="">Todas las áreas</option>
+                  {areaOptions.map((area) => (
+                    <option key={area.value} value={area.value}>{area.icon} {area.label}</option>
                   ))}
                 </select>
               </div>
