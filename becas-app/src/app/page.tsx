@@ -1,8 +1,8 @@
-import Link from "next/link";
 import prisma from "@/lib/prisma";
 import { GraduationCap } from "lucide-react";
 import ScholarshipFilters from "@/components/ScholarshipFilters";
 import ScholarshipCard from "@/components/ScholarshipCard";
+import { Button, Card, Badge, SectionHeader, Title, Subtitle } from "@/components/ui";
 import { getFundingInfo, getEducationInfo } from "@/lib/constants";
 
 // Force dynamic rendering - page fetches from database
@@ -85,49 +85,35 @@ export default async function Home({
   return (
     <div className="space-y-6 sm:space-y-8">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-            {hasFilters ? "Resultados" : "Becas Disponibles"}
-          </h1>
-          <p className="text-gray-500 mt-1">
-            {scholarships.length} beca{scholarships.length !== 1 ? "s" : ""} encontrada{scholarships.length !== 1 ? "s" : ""}
-            {params.search && (
-              <span> para "<span className="font-semibold text-gray-700">{params.search}</span>"</span>
-            )}
-          </p>
-        </div>
-        
+      <SectionHeader
+        title={hasFilters ? "Resultados" : "Becas Disponibles"}
+        subtitle={`${scholarships.length} beca${scholarships.length !== 1 ? "s" : ""} encontrada${scholarships.length !== 1 ? "s" : ""}${params.search ? ` para "${params.search}"` : ""}`}
+      >
         <div className="flex items-center gap-3">
           <ScholarshipFilters countries={countries} />
           {hasFilters && (
-            <Link 
-              href="/"
-              className="text-emerald-600 hover:text-emerald-700 font-medium text-sm flex items-center gap-1"
-            >
+            <Button href="/" variant="ghost" size="sm">
               Limpiar filtros
-            </Link>
+            </Button>
           )}
         </div>
-      </div>
+      </SectionHeader>
 
       {/* Active Filters Display */}
       {hasFilters && (
         <div className="flex flex-wrap gap-2">
           {params.country && (
-            <span className="inline-flex items-center gap-1 px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full text-sm font-medium">
-              📍 {params.country}
-            </span>
+            <Badge color="emerald" icon="📍">{params.country}</Badge>
           )}
           {params.funding && (
-            <span className="inline-flex items-center gap-1 px-3 py-1 bg-amber-50 text-amber-700 rounded-full text-sm font-medium">
-              {getFundingInfo(params.funding).icon} {getFundingInfo(params.funding).label}
-            </span>
+            <Badge color="amber" icon={getFundingInfo(params.funding).icon}>
+              {getFundingInfo(params.funding).label}
+            </Badge>
           )}
           {params.level && (
-            <span className="inline-flex items-center gap-1 px-3 py-1 bg-purple-50 text-purple-700 rounded-full text-sm font-medium">
-              {getEducationInfo(params.level).icon} {getEducationInfo(params.level).label}
-            </span>
+            <Badge color="purple" icon={getEducationInfo(params.level).icon}>
+              {getEducationInfo(params.level).label}
+            </Badge>
           )}
         </div>
       )}
@@ -141,31 +127,28 @@ export default async function Home({
 
       {/* Empty State */}
       {scholarships.length === 0 && (
-        <div className="text-center py-16 sm:py-24 bg-white rounded-2xl border border-dashed border-gray-200">
+        <Card variant="bordered" padding="lg" className="text-center border-dashed">
           <div className="w-20 h-20 bg-gray-100 rounded-full mx-auto flex items-center justify-center mb-6">
             <GraduationCap size={40} className="text-gray-400" />
           </div>
-          <h3 className="text-xl font-bold text-gray-900 mb-2">
+          <Title size="md" className="mb-2">
             {hasFilters 
               ? "No encontramos becas con estos filtros"
               : "No hay becas publicadas aún"
             }
-          </h3>
-          <p className="text-gray-500 max-w-md mx-auto">
+          </Title>
+          <Subtitle className="max-w-md mx-auto">
             {hasFilters 
               ? "Intenta con otros filtros o limpia la búsqueda."
               : "Las becas aparecerán aquí cuando estén disponibles."
             }
-          </p>
+          </Subtitle>
           {hasFilters && (
-            <Link 
-              href="/"
-              className="mt-6 inline-flex items-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-xl transition-colors"
-            >
+            <Button href="/" variant="primary" size="lg" className="mt-6">
               Ver todas las becas
-            </Link>
+            </Button>
           )}
-        </div>
+        </Card>
       )}
     </div>
   );

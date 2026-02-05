@@ -1,9 +1,9 @@
 "use client";
 
-import { Suspense } from "react";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { GraduationCap, LogIn, AlertCircle, Eye, EyeOff } from "lucide-react";
+import { Button, Card, Title, Input } from "@/components/ui";
 
 // Inner component that uses useSearchParams
 function LoginForm() {
@@ -51,25 +51,17 @@ function LoginForm() {
         </div>
       )}
 
-      <div>
-        <label className="block text-sm font-semibold text-gray-700 mb-2">
-          Usuario
-        </label>
-        <input
-          type="text"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          className="w-full px-4 py-3.5 bg-gray-50 border-2 border-gray-200 rounded-xl 
-                   text-gray-900 placeholder-gray-400
-                   focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 
-                   transition-all duration-200 outline-none"
-          placeholder="Ingresa tu usuario"
-          required
-        />
-      </div>
+      <Input
+        label="Usuario"
+        type="text"
+        value={username}
+        onChange={(e) => setUsername(e.target.value)}
+        placeholder="Ingresa tu usuario"
+        required
+      />
 
-      <div>
-        <label className="block text-sm font-semibold text-gray-700 mb-2">
+      <div className="space-y-2">
+        <label className="block text-sm font-semibold text-gray-700">
           Contraseña
         </label>
         <div className="relative">
@@ -77,10 +69,10 @@ function LoginForm() {
             type={showPassword ? "text" : "password"}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-3.5 bg-gray-50 border-2 border-gray-200 rounded-xl 
+            className="w-full px-4 py-2.5 bg-gray-50 border-2 border-gray-200 rounded-xl 
                      text-gray-900 placeholder-gray-400
-                     focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 
-                     transition-all duration-200 outline-none pr-12"
+                     focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 
+                     transition-all outline-none pr-12"
             placeholder="Ingresa tu contraseña"
             required
           />
@@ -94,30 +86,16 @@ function LoginForm() {
         </div>
       </div>
 
-      <button
+      <Button
         type="submit"
-        disabled={loading}
-        className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 
-                 hover:from-emerald-700 hover:to-teal-700
-                 text-white font-bold py-4 px-6 rounded-xl 
-                 transition-all duration-200 
-                 flex items-center justify-center gap-3 
-                 disabled:opacity-50 disabled:cursor-not-allowed
-                 shadow-lg shadow-emerald-500/25 hover:shadow-xl hover:shadow-emerald-500/30
-                 active:scale-[0.98]"
+        variant="primary"
+        size="lg"
+        fullWidth
+        isLoading={loading}
       >
-        {loading ? (
-          <div className="flex items-center gap-3">
-            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-            <span>Ingresando...</span>
-          </div>
-        ) : (
-          <>
-            <LogIn size={20} />
-            <span>Ingresar al Panel</span>
-          </>
-        )}
-      </button>
+        <LogIn size={20} />
+        <span>Ingresar al Panel</span>
+      </Button>
     </form>
   );
 }
@@ -143,15 +121,15 @@ export default function AdminLogin() {
         </div>
 
         {/* Login Card */}
-        <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl p-8 border border-white/20">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+        <Card variant="elevated" padding="lg" className="backdrop-blur-xl">
+          <Title size="lg" className="mb-6 text-center">
             Bienvenido
-          </h2>
+          </Title>
 
           <Suspense fallback={<div className="text-center text-gray-500">Cargando...</div>}>
             <LoginForm />
           </Suspense>
-        </div>
+        </Card>
 
         <p className="text-center text-emerald-200/60 mt-8 text-sm">
           © 2026 Becas App · Administración

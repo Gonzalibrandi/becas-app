@@ -1,8 +1,8 @@
 import AdminLayout from "@/components/admin/AdminLayout";
-import StatusBadge from "@/components/admin/StatusBadge";
 import prisma from "@/lib/prisma";
 import Link from "next/link";
 import { Plus, Search, ExternalLink, GraduationCap } from "lucide-react";
+import { Button, Card, Badge, SectionHeader, StatusBadge, Input } from "@/components/ui";
 
 export const dynamic = 'force-dynamic';
 
@@ -58,22 +58,18 @@ export default async function AdminBecasPage({
     <AdminLayout>
       <div className="space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-slate-800">Becas</h1>
-            <p className="text-slate-600 text-sm sm:text-base mt-1">Gestiona todas las becas del sistema</p>
-          </div>
-          <Link
-            href="/admin/becas/new"
-            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors text-sm sm:text-base"
-          >
+        <SectionHeader
+          title="Becas"
+          subtitle="Gestiona todas las becas del sistema"
+        >
+          <Button href="/admin/becas/new" variant="primary" size="md">
             <Plus size={18} />
             <span>Nueva Beca</span>
-          </Link>
-        </div>
+          </Button>
+        </SectionHeader>
 
         {/* Filters */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-3 sm:p-4">
+        <Card padding="sm">
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 sm:items-center">
             {/* Search */}
             <form className="flex-1">
@@ -84,12 +80,12 @@ export default async function AdminBecasPage({
                   name="search"
                   defaultValue={params.search}
                   placeholder="Buscar becas..."
-                  className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm"
+                  className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm"
                 />
               </div>
             </form>
 
-            {/* Status Filter - Scrollable on mobile */}
+            {/* Status Filter */}
             <div className="flex gap-2 overflow-x-auto pb-3 -mx-1 px-1">
               {statusFilters.map((filter) => (
                 <Link
@@ -97,7 +93,7 @@ export default async function AdminBecasPage({
                   href={`/admin/becas?status=${filter.value}${params.search ? `&search=${params.search}` : ""}`}
                   className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-colors whitespace-nowrap flex-shrink-0 ${
                     currentStatus === filter.value
-                      ? "bg-green-600 text-white"
+                      ? "bg-emerald-600 text-white"
                       : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                   }`}
                 >
@@ -106,7 +102,7 @@ export default async function AdminBecasPage({
               ))}
             </div>
           </div>
-        </div>
+        </Card>
 
         {/* Mobile Cards View */}
         <div className="block lg:hidden space-y-3">
@@ -114,31 +110,33 @@ export default async function AdminBecasPage({
             <Link
               key={s.id}
               href={`/admin/becas/${s.id}`}
-              className="block bg-white rounded-xl shadow-sm border border-slate-200 p-4 hover:shadow-md transition-shadow"
+              className="block"
             >
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex items-start gap-3 flex-1 min-w-0">
-                  <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <GraduationCap size={20} className="text-emerald-600" />
+              <Card hover padding="md">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-start gap-3 flex-1 min-w-0">
+                    <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <GraduationCap size={20} className="text-emerald-600" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-slate-800 truncate">{s.title}</p>
+                      <p className="text-sm text-slate-500 mt-0.5">📍 {s.country}</p>
+                    </div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-slate-800 truncate">{s.title}</p>
-                    <p className="text-sm text-slate-500 mt-0.5">📍 {s.country}</p>
-                  </div>
+                  <StatusBadge status={s.status} />
                 </div>
-                <StatusBadge status={s.status} />
-              </div>
-              <div className="flex items-center gap-4 mt-3 text-xs text-slate-500">
-                <span>{s.educationLevel}</span>
-                <span>•</span>
-                <span>{s.deadline ? new Date(s.deadline).toLocaleDateString("es-AR") : "Sin fecha"}</span>
-              </div>
+                <div className="flex items-center gap-4 mt-3 text-xs text-slate-500">
+                  <span>{s.educationLevel}</span>
+                  <span>•</span>
+                  <span>{s.deadline ? new Date(s.deadline).toLocaleDateString("es-AR") : "Sin fecha"}</span>
+                </div>
+              </Card>
             </Link>
           ))}
         </div>
 
         {/* Desktop Table View */}
-        <div className="hidden lg:block bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <Card padding="none" className="hidden lg:block overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-slate-50 border-b border-slate-200">
@@ -167,16 +165,13 @@ export default async function AdminBecasPage({
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex gap-2">
-                        <Link
-                          href={`/admin/becas/${s.id}`}
-                          className="text-green-600 hover:text-green-700 font-medium text-sm"
-                        >
+                        <Button href={`/admin/becas/${s.id}`} variant="ghost" size="sm">
                           Editar
-                        </Link>
+                        </Button>
                         <Link
                           href={`/becas/${s.slug}`}
                           target="_blank"
-                          className="text-slate-400 hover:text-slate-600"
+                          className="text-slate-400 hover:text-slate-600 p-1"
                         >
                           <ExternalLink size={16} />
                         </Link>
@@ -193,13 +188,13 @@ export default async function AdminBecasPage({
               No se encontraron becas
             </div>
           )}
-        </div>
+        </Card>
 
         {/* Empty state for mobile */}
         {scholarships.length === 0 && (
-          <div className="lg:hidden p-8 text-center text-slate-500 bg-white rounded-xl border border-slate-200">
+          <Card padding="lg" className="lg:hidden text-center text-slate-500">
             No se encontraron becas
-          </div>
+          </Card>
         )}
 
         <p className="text-xs sm:text-sm text-slate-500 text-center">
