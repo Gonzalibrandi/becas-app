@@ -114,32 +114,103 @@ export async function POST(request: NextRequest) {
     }
 
     const prompt = `
-Eres un extractor de datos experto para becas educativas. Tu objetivo es analizar el texto de una convocatoria y generar un JSON VALIDO que cumpla EXACTAMENTE con el esquema especificado.
+Eres un extractor de datos experto para becas educativas. Tu objetivo es analizar el texto de una convocatoria y generar un JSON VÁLIDO que cumpla EXACTAMENTE con el esquema especificado.
 
-URL de Origen: ${url}
+URL de Origen: {source_url}
 
-=== CAMPOS OBLIGATORIOS ===
-1. "title" (string): Nombre oficial de la beca.
-2. "description" (string): Resumen atractivo de 2-3 oraciones.
-3. "country" (string): Nombre COMPLETO del pais destino EN ESPAÑOL (ej: "Reino Unido", "Internacional").
+=== CAMPOS OBLIGATORIOS (siempre deben tener valor) ===
 
-=== CAMPOS DE FECHA (YYYY-MM-DD o null) ===
-4. "deadline" (string|null): Fecha limite.
-5. "start_date" (string|null): Fecha inicio cursada.
+1. "title" (string, max 255 chars): 
+   - Nombre oficial de la beca
+   - Ejemplo: "Beca Chevening para Jóvenes Líderes"
 
-=== CAMPOS ENUM ===
-6. "funding_type": "FULL", "PARTIAL", "ONE_TIME", "UNKNOWN"
-7. "education_level": "UNDERGRADUATE", "MASTER", "PHD", "RESEARCH", "SHORT_COURSE", "OTHER"
+2. "description" (string): 
+   - Resumen atractivo de 2-3 oraciones máximo
+   - Redactado para motivar al lector a aplicar
 
-=== TEXTO LIBRE ("" si no hay info) ===
-8. "areas": Areas de estudio, una por linea (\\n).
-9. "benefits": Beneficios, uno por linea (\\n).
-10. "requirements": Requisitos, uno por linea (\\n).
-11. "duracion": Duracion (ej: "1 año").
+3. "country" (string, max 100 chars): 
+   - Nombre COMPLETO del país destino EN ESPAÑOL
+   - Ejemplos válidos: "Argentina", "Reino Unido", "Estados Unidos", "Alemania", "Francia"
+   - Si aplica a varios países: "Internacional"
+   - NUNCA uses códigos ISO como "AR" o "UK"
 
-=== URLs (string|null) ===
-12. "apply_url": URL directa para aplicar.
-13. "official_url": URL de la organización.
+=== CAMPOS DE FECHA (formato estricto o null) ===
+
+4. "deadline" (string o null): 
+   - Fecha límite de inscripción en formato EXACTO: "YYYY-MM-DD"
+   - Si el texto dice "marzo 2026" usa "2026-03-31"
+   - Si no hay año, asume el próximo año lógico
+   - Si NO hay fecha límite clara: null
+
+5. "start_date" (string o null): 
+   - Fecha de inicio de la beca/cursada en formato: "YYYY-MM-DD"
+   - Si NO se menciona: null
+
+=== CAMPOS ENUM (valores EXACTOS, case-sensitive) ===
+
+6. "funding_type" (string): 
+   SOLO estos valores permitidos:
+   - "FULL" = Cobertura total (pasajes + alojamiento + matrícula + estipendio)
+   - "PARTIAL" = Cubre solo algunos gastos
+   - "ONE_TIME" = Pago único
+   - "UNKNOWN" = No está claro (usar si hay duda)
+
+7. "education_level" (string): 
+   SOLO estos valores permitidos:
+   - "UNDERGRADUATE" = Grado/Licenciatura
+   - "MASTER" = Maestría/Posgrado
+   - "PHD" = Doctorado
+   - "RESEARCH" = Investigación/Postdoc
+   - "SHORT_COURSE" = Curso corto/Capacitación
+   - "OTHER" = Otro o no especificado
+
+=== CAMPOS DE TEXTO LIBRE (string vacío "" si no hay info) ===
+
+8. "areas" (string, max 500 chars): 
+   - Áreas de estudio, UNA POR LÍNEA separadas por salto de línea (\\n)
+   - Ejemplo: "Ingeniería\\nCiencias Sociales\\nArte\\nMedicina"
+   - Si aplica a todas: "Todas las áreas"
+   - Cada área en una línea separada, sin viñetas ni guiones
+   - Si no hay info: ""
+
+9. "benefits" (string): 
+   - Lista de beneficios, UNO POR LÍNEA separados por salto de línea (\\n)
+   - Ejemplo: "Pasajes aéreos ida y vuelta\\nAlojamiento completo\\nSeguro médico\\nEstipendio mensual de 1500 USD"
+   - Cada beneficio en una línea separada, sin viñetas ni guiones
+   - Si no hay info: ""
+
+10. "requirements" (string): 
+    - Requisitos principales, UNO POR LÍNEA separados por salto de línea (\\n)
+    - Ejemplo: "Título universitario\\nNivel de inglés C1\\nMenor de 35 años\\nCarta de motivación"
+    - Cada requisito en una línea separada, sin viñetas ni guiones
+    - Si no hay info: ""
+
+11. "duracion" (string, max 100 chars): 
+    - Duración de la beca
+    - Ejemplos: "1 año", "6 meses", "2 semestres", "3-12 meses"
+    - Si no hay info: ""
+
+=== CAMPOS URL (string o null) ===
+
+12. "apply_url" (string o null): 
+    - URL DIRECTA para aplicar/postularse a la beca
+    - Busca enlaces con texto como "Consultar", "Bases y Condiciones", "Apply", "Postularse"
+    - Ejemplo: "https://www.chevening.org/scholarships/"
+    - Si no encuentras un link directo de aplicación: null
+
+13. "official_url" (string o null): 
+    - URL de la web de la ORGANIZACIÓN/FUNDACIÓN/EMBAJADA que otorga la beca
+    - Busca enlaces con texto como "Sitio web", "Web oficial"
+    - Ejemplo: "https://www.gov.uk/world/organisations/british-embassy"
+    - NO incluir URLs de sitios gubernamentales de origen (ej: argentina.gob.ar)
+    - Si no encuentras: null
+
+=== REGLAS IMPORTANTES ===
+- Responde SOLO con JSON válido, sin texto adicional
+- Usa null para campos de fecha/URL cuando no hay información
+- Usa "" (string vacío) para campos de texto libre cuando no hay información
+- Los valores de funding_type y education_level deben ser EXACTAMENTE como se especifican (MAYÚSCULAS)
+- No inventes información que no esté en el texto
 
 === TEXTO A ANALIZAR ===
 ${textContent}
