@@ -4,10 +4,10 @@ import { Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { Filter, X, ChevronDown } from "lucide-react";
-import { FUNDING_TYPES, EDUCATION_LEVELS, STUDY_AREAS } from "@/lib/constants";
+import { FUNDING_TYPES, EDUCATION_LEVELS } from "@/lib/constants";
 
 // Inner component that uses useSearchParams
-function FiltersContent({ countries }: { countries: string[] }) {
+function FiltersContent({ countries, areaOptions }: { countries: string[], areaOptions: string[] }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   
@@ -51,8 +51,6 @@ function FiltersContent({ countries }: { countries: string[] }) {
   const fundingOptions = FUNDING_TYPES.slice(0, 3);
   // Only show first 5 education levels (exclude OTHER)
   const levelOptions = EDUCATION_LEVELS.slice(0, 5);
-  // Only show first 9 areas (exclude ALL)
-  const areaOptions = STUDY_AREAS.slice(0, 9);
 
   return (
     <div className="relative">
@@ -130,7 +128,7 @@ function FiltersContent({ countries }: { countries: string[] }) {
                 >
                   <option value="">Todas las áreas</option>
                   {areaOptions.map((area) => (
-                    <option key={area.value} value={area.value}>{area.icon} {area.label}</option>
+                    <option key={area} value={area}>{area}</option>
                   ))}
                 </select>
               </div>
@@ -204,10 +202,10 @@ function FiltersFallback() {
 }
 
 // Main component wrapped in Suspense
-export default function ScholarshipFilters({ countries }: { countries: string[] }) {
+export default function ScholarshipFilters({ countries, areaOptions }: { countries: string[], areaOptions: string[] }) {
   return (
     <Suspense fallback={<FiltersFallback />}>
-      <FiltersContent countries={countries} />
+      <FiltersContent countries={countries} areaOptions={areaOptions} />
     </Suspense>
   );
 }

@@ -7,7 +7,6 @@ import { Home, User, Settings, Menu, X, GraduationCap, BookOpen, Heart, Bell } f
 import SearchBar from "./SearchBar";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const pathname = usePathname();
 
   // Don't show this layout on admin pages
@@ -31,14 +30,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           
           {/* Left: Menu button (mobile) or logo (desktop) */}
           <div className="flex items-center gap-4">
-            <button 
-              onClick={() => setIsSidebarOpen(true)}
-              className="lg:hidden p-2 -ml-2 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
-              aria-label="Abrir menú"
-            >
-              <Menu size={24} />
-            </button>
-            
             {/* Logo - always visible */}
             <Link href="/" className="flex items-center gap-2 font-bold text-xl text-gray-900">
               <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center">
@@ -52,123 +43,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <div className="hidden md:block flex-1 max-w-xl mx-8">
             <SearchBar />
           </div>
-
-          {/* Right: Actions */}
-          <div className="flex items-center gap-2 sm:gap-3">
-            <button className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-xl transition-colors relative">
-              <Bell size={22} />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-emerald-500 rounded-full"></span>
-            </button>
-            <Link 
-              href="/perfil"
-              className="w-10 h-10 bg-gradient-to-br from-emerald-600 to-teal-600 rounded-xl flex items-center justify-center text-white font-bold text-sm"
-            >
-              U
-            </Link>
-          </div>
         </div>
       </header>
-
-
-      {/* ===== SIDEBAR (Mobile Drawer) ===== */}
-      <aside 
-        className={`
-          fixed inset-y-0 left-0 z-50 w-80 max-w-[85vw] bg-white shadow-2xl 
-          transform transition-transform duration-300 ease-out
-          ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}
-          lg:hidden
-        `}
-      >
-        {/* Sidebar Header */}
-        <div className="h-16 flex items-center justify-between px-5 border-b border-gray-100">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center">
-              <GraduationCap className="text-white" size={22} />
-            </div>
-            <span className="font-bold text-lg text-gray-900">Becas App</span>
-          </div>
-          <button 
-            onClick={() => setIsSidebarOpen(false)}
-            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
-            aria-label="Cerrar menú"
-          >
-            <X size={24} />
-          </button>
-        </div>
-
-        {/* Sidebar Search (mobile only) */}
-        <div className="p-4 border-b border-gray-100">
-          <SearchBar />
-        </div>
-
-        {/* Navigation Links */}
-        <nav className="p-4 space-y-1">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider px-4 mb-3">
-            Navegación
-          </p>
-          {navItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={() => setIsSidebarOpen(false)}
-              className={`
-                flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium
-                ${pathname === item.href
-                  ? "bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/25"
-                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                }
-              `}
-            >
-              <item.icon size={20} />
-              <span>{item.label}</span>
-            </Link>
-          ))}
-        </nav>
-
-        {/* Sidebar Footer */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-100 bg-gray-50/50">
-          <div className="flex items-center gap-3 px-4 py-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-emerald-600 to-teal-600 rounded-full flex items-center justify-center text-white font-bold">
-              U
-            </div>
-            <div>
-              <p className="font-medium text-gray-900 text-sm">Usuario</p>
-              <p className="text-xs text-gray-500">usuario@email.com</p>
-            </div>
-          </div>
-        </div>
-      </aside>
-
-
-      {/* ===== SIDEBAR (Desktop - Optional, shown as persistent) ===== */}
-      {/* Uncomment this block if you want a persistent sidebar on desktop */}
-      {/* 
-      <aside className="hidden lg:block fixed inset-y-0 left-0 w-64 bg-white border-r border-gray-200 pt-18 z-20">
-        <nav className="p-4 space-y-1">
-          {navItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={...}
-            >
-              <item.icon size={20} />
-              <span>{item.label}</span>
-            </Link>
-          ))}
-        </nav>
-      </aside>
-      */}
-
-
-      {/* ===== OVERLAY (Mobile) ===== */}
-      {isSidebarOpen && (
-        <div 
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden"
-          onClick={() => setIsSidebarOpen(false)}
-          aria-hidden="true"
-        />
-      )}
-
 
       {/* ===== MAIN CONTENT ===== */}
       <main className="pt-16 md:pt-18 min-h-screen">
