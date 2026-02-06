@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { AlertTriangle, CheckCircle, X, Trash2, RefreshCw } from "lucide-react";
-import { Button } from "@/components/ui";
+import { Button } from "@/components";
 
 interface ConfirmModalProps {
   isOpen: boolean;

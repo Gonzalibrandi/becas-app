@@ -27,8 +27,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const navItems = [
     { href: "/admin", icon: LayoutDashboard, label: "Dashboard" },
-    { href: "/admin/becas", icon: GraduationCap, label: "Becas" },
-    { href: "/admin/becas/new", icon: Plus, label: "Nueva Beca" },
+    { href: "/admin/scholarships", icon: GraduationCap, label: "Becas" },
+    { href: "/admin/scholarships/add-scholarship", icon: Plus, label: "Nueva Beca" },
     { href: "/admin/users", icon: User, label: "Usuarios" },
   ];
 

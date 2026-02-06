@@ -1,8 +1,8 @@
 import prisma from "@/lib/prisma";
 import { GraduationCap } from "lucide-react";
-import ScholarshipFilters from "@/components/ScholarshipFilters";
-import ScholarshipCard from "@/components/ScholarshipCard";
-import { Button, Card, Badge, SectionHeader, Title, Subtitle } from "@/components/ui";
+import ScholarshipFilters from "@/features/scholarships/components/ScholarshipFilters";
+import ScholarshipCard from "@/features/scholarships/components/ScholarshipCard";
+import { Button, Card, Badge, SectionHeader, Title, Subtitle } from "@/components";
 import { getFundingInfo, getEducationInfo } from "@/lib/constants";
 
 // Force dynamic rendering - page fetches from database
@@ -33,61 +33,17 @@ async function getCountries(): Promise<string[]> {
   }
 }
 
-// Known study areas to detect in text (regardless of separators)
-const KNOWN_AREAS = [
-  "Ingeniería y Tecnología",
-  "Ciencias Sociales y Comunicación",
-  "Economía, Negocios y Administración",
-  "Artes, Diseño y Cultura",
-  "Salud y Medicina",
-  "Ciencias Puras y Aplicadas",
-  "Computación, Matemáticas y Ciencias de la Información",
-  "Agricultura, Medio Ambiente y afines",
-  "Derecho y afines",
-  "Educación y Formación Docente",
-  "Humanidades",
-  "Arquitectura, Construcción y Planeamiento",
-  "Turismo y Hospitalidad",
-  "Idiomas",
-];
-
-// Get unique areas from database
 async function getStudyAreas(): Promise<string[]> {
   try {
     const scholarships = await prisma.scholarship.findMany({
       where: { status: "PUBLISHED" },
       select: { areas: true },
+      distinct: ["areas"],
     });
-    
-    // Deduplicate logic handling concatenated strings
-    const areaSet = new Set<string>();
-
-    scholarships.forEach(s => {
-      if (!s.areas) return;
-      
-      const rawText = s.areas;
-      let foundAny = false;
-
-      // 1. Try to find Known Areas within the text
-      KNOWN_AREAS.forEach(known => {
-        // Check if the known area phrase exists in the text (case insensitive)
-        const regex = new RegExp(known.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
-        if (regex.test(rawText)) {
-          areaSet.add(known);
-          foundAny = true;
-        }
-      });
-
-      // 2. Fallback: If no known areas found, use standard splitting
-      if (!foundAny) {
-         rawText.split('\n').forEach(a => {
-           const clean = a.trim().replace(/[.,;]+$/, '');
-           if (clean) areaSet.add(clean);
-         });
-      }
-    });
-
-    return Array.from(areaSet).sort();
+    return scholarships
+      .map(s => s.areas)
+      .filter((a): a is string => Boolean(a))
+      .sort();
   } catch {
     return [];
   }
@@ -154,7 +110,7 @@ export default async function Home({
         subtitle={`${scholarships.length} beca${scholarships.length !== 1 ? "s" : ""} encontrada${scholarships.length !== 1 ? "s" : ""}${params.search ? ` para "${params.search}"` : ""}`}
       >
         <div className="flex items-center gap-3">
-          <ScholarshipFilters countries={countries} areaOptions={studyAreas}/>
+          <ScholarshipFilters countries={countries} areaOptions={studyAreas} />
           {hasFilters && (
             <Button href="/" variant="ghost" size="sm">
               Limpiar filtros
@@ -180,7 +136,7 @@ export default async function Home({
             </Badge>
           )}
           {params.area && (
-            <Badge color="blue" icon="🎓">{params.area}</Badge>
+            <Badge color="blue" icon="📍">{params.area}</Badge>
           )}
         </div>
       )}

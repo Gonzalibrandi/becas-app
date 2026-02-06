@@ -4,8 +4,8 @@ import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Plus, Search, ExternalLink, GraduationCap } from "lucide-react";
-import { Button, Card, SectionHeader, StatusBadge } from "@/components/ui";
-import BulkActions from "@/components/admin/BulkActions";
+import { Button, Card, SectionHeader, StatusBadge } from "@/components";
+import BulkActions from "@/features/admin/BulkActions";
 
 interface Scholarship {
   id: string;
@@ -74,11 +74,11 @@ export default function AdminBecasClient({
         subtitle="Gestiona todas las becas del sistema"
       >
         <div className="flex gap-2">
-          <Button href="/admin/becas/import" variant="outline" size="md">
+          <Button href="/admin/scholarships/import-from-argentina-government" variant="outline" size="md">
             <GraduationCap size={18} />
             <span>Importar Argentina.gob.ar</span>
           </Button>
-          <Button href="/admin/becas/new" variant="primary" size="md">
+          <Button href="/admin/scholarships/add-scholarship" variant="primary" size="md">
             <Plus size={18} />
             <span>Nueva Beca</span>
           </Button>
@@ -107,7 +107,7 @@ export default function AdminBecasClient({
             {statusFilters.map((filter) => (
               <Link
                 key={filter.value}
-                href={`/admin/becas?status=${filter.value}${searchQuery ? `&search=${searchQuery}` : ""}`}
+                href={`/admin/scholarships?status=${filter.value}${searchQuery ? `&search=${searchQuery}` : ""}`}
                 className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-colors whitespace-nowrap flex-shrink-0 ${
                   currentStatus === filter.value
                     ? "bg-emerald-600 text-white"
@@ -140,7 +140,7 @@ export default function AdminBecasClient({
               />
               
               {/* Content - clickable */}
-              <Link href={`/admin/becas/${s.id}`} className="flex-1 min-w-0">
+              <Link href={`/admin/scholarships/${s.id}`} className="flex-1 min-w-0">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-start gap-3 flex-1 min-w-0">
                     <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -216,7 +216,7 @@ export default function AdminBecasClient({
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex gap-2">
-                      <Button href={`/admin/becas/${s.id}`} variant="ghost" size="sm">
+                      <Button href={`/admin/scholarships/${s.id}`} variant="ghost" size="sm">
                         Editar
                       </Button>
                       <Link

@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import AdminLayout from "@/components/admin/AdminLayout";
-import { Button } from "@/components/ui/Button";
-import { Card } from "@/components/ui/Card";
-import { fetchGoogleSheetData, SheetScholarship } from "@/lib/google-sheets";
+import AdminLayout from "@/features/admin/AdminLayout";
+import { Button } from "@/components/Button";
+import { Card } from "@/components/Card";
+import { fetchGoogleSheetData, SheetScholarship } from "@/services/google-sheets";
 import { Check, AlertCircle, Loader2, ArrowRight, Save, Database } from "lucide-react";
 
 export default function ImportPage() {

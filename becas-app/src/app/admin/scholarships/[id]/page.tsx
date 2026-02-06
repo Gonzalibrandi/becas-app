@@ -1,5 +1,5 @@
-import AdminLayout from "@/components/admin/AdminLayout";
-import ScholarshipForm from "@/components/admin/ScholarshipForm";
+import AdminLayout from "@/features/admin/AdminLayout";
+import ScholarshipForm from "@/features/admin/ScholarshipForm";
 import prisma from "@/lib/prisma";
 import { notFound } from "next/navigation";
 

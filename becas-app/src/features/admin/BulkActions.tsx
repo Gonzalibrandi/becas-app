@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Trash2, Check, ChevronDown, X } from "lucide-react";
-import ConfirmModal, { ResultModal } from "@/components/ui/Modal";
+import ConfirmModal, { ResultModal } from "@/components/Modal";
 
 type BulkAction = "delete" | "changeStatus";
 

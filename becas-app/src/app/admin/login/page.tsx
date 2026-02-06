@@ -3,7 +3,7 @@
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { GraduationCap, LogIn, AlertCircle, Eye, EyeOff } from "lucide-react";
-import { Button, Card, Title, Input } from "@/components/ui";
+import { Button, Card, Title, Input } from "@/components";
 
 // Inner component that uses useSearchParams
 function LoginForm() {

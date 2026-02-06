@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, User, Settings, Menu, X, GraduationCap, BookOpen, Heart, Bell } from "lucide-react";
-import SearchBar from "./SearchBar";
+import SearchBar from "../../components/SearchBar";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -26,23 +26,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       
       {/* ===== HEADER (Mobile + Desktop) ===== */}
       <header className="fixed top-0 left-0 right-0 h-16 md:h-18 bg-white/95 backdrop-blur-md border-b border-gray-200/50 z-30 shadow-sm">
-        <div className="max-w-7xl mx-auto h-full px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-          
-          {/* Left: Menu button (mobile) or logo (desktop) */}
-          <div className="flex items-center gap-4">
-            {/* Logo - always visible */}
-            <Link href="/" className="flex items-center gap-2 font-bold text-xl text-gray-900">
-              <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center">
-                <GraduationCap className="text-white" size={22} />
-              </div>
-              <span className="hidden sm:inline">BECAS APP</span>
-            </Link>
-          </div>
-
-          {/* Center: Search (hidden on mobile, shown on tablet+) */}
-          <div className="hidden md:block flex-1 max-w-xl mx-8">
-            <SearchBar />
-          </div>
+        <div className="max-w-7xl mx-auto h-full px-4 sm:px-6 lg:px-8 flex items-center justify-center">
+          <Link href="/" className="flex items-center gap-2 font-bold text-xl text-gray-900">
+            <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center">
+              <GraduationCap className="text-white" size={22} />
+            </div>
+            <span>BECAS APP</span>
+          </Link>
         </div>
       </header>
 
@@ -52,7 +42,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
           
           {/* Mobile Search (shown only on mobile) */}
-          <div className="md:hidden mb-6">
+          <div className="mb-6">
             <SearchBar />
           </div>
 

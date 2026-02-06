@@ -1,5 +1,5 @@
-import AdminLayout from "@/components/admin/AdminLayout";
-import StatusBadge from "@/components/admin/StatusBadge";
+import AdminLayout from "@/features/admin/AdminLayout";
+import StatusBadge from "@/features/admin/StatusBadge";
 import prisma from "@/lib/prisma";
 import { GraduationCap, Clock, CheckCircle, Archive, FileEdit, TrendingUp, ArrowRight } from "lucide-react";
 import Link from "next/link";
@@ -88,7 +88,7 @@ export default async function AdminDashboard() {
             <p className="text-gray-500 text-sm mt-0.5">Resumen del sistema de becas</p>
           </div>
           <Link
-            href="/admin/becas"
+            href="/admin/scholarships"
             className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white px-5 py-2.5 rounded-xl font-medium flex items-center gap-2 transition-all shadow-lg shadow-emerald-500/25"
           >
             <span>Ver Becas</span>
@@ -141,7 +141,7 @@ export default async function AdminDashboard() {
           <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
             <h2 className="text-base font-bold text-gray-900">Becas Recientes</h2>
             <Link 
-              href="/admin/becas"
+              href="/admin/scholarships"
               className="text-emerald-600 hover:text-emerald-700 font-medium text-xs flex items-center gap-1 transition-colors"
             >
               Ver todas
@@ -152,7 +152,7 @@ export default async function AdminDashboard() {
             {recent.map((scholarship) => (
               <Link 
                 key={scholarship.id}
-                href={`/admin/becas/${scholarship.id}`}
+                href={`/admin/scholarships/${scholarship.id}`}
                 className="block p-5 hover:bg-gray-50 transition-colors group"
               >
                 <div className="flex items-center justify-between">

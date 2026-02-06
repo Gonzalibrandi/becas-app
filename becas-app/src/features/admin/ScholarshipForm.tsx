@@ -3,9 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Sparkles, Globe, MapPin, Calendar, DollarSign, BookOpen, Wallet, Save } from "lucide-react";
-import { Input, Textarea, Select } from "@/components/ui/Input";
-import { Button } from "@/components/ui/Button";
-import { Card } from "@/components/ui/Card";
+import { Input, Textarea, Select } from "@/components/Input";
+import { Button } from "@/components/Button";
+import { Card } from "@/components/Card";
 
 interface ScholarshipFormProps {
   initialData?: any;
@@ -121,7 +121,7 @@ export default function ScholarshipForm({ initialData, isEditing = false }: Scho
         throw new Error(err.error || "Error al guardar");
       }
 
-      router.push("/admin/becas");
+      router.push("/admin/scholarships");
       router.refresh();
     } catch (err: any) {
       setError(err.message);

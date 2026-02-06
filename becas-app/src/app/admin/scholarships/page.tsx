@@ -1,4 +1,4 @@
-import AdminLayout from "@/components/admin/AdminLayout";
+import AdminLayout from "@/features/admin/AdminLayout";
 import prisma from "@/lib/prisma";
 import AdminBecasClient from "./AdminBecasClient";
 
