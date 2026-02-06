@@ -73,10 +73,16 @@ export default function AdminBecasClient({
         title="Becas"
         subtitle="Gestiona todas las becas del sistema"
       >
-        <Button href="/admin/becas/new" variant="primary" size="md">
-          <Plus size={18} />
-          <span>Nueva Beca</span>
-        </Button>
+        <div className="flex gap-2">
+          <Button href="/admin/becas/import" variant="outline" size="md">
+            <GraduationCap size={18} />
+            <span>Importar Argentina.gob.ar</span>
+          </Button>
+          <Button href="/admin/becas/new" variant="primary" size="md">
+            <Plus size={18} />
+            <span>Nueva Beca</span>
+          </Button>
+        </div>
       </SectionHeader>
 
       {/* Filters */}

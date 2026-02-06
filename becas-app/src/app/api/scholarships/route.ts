@@ -129,6 +129,21 @@ export async function POST(request: NextRequest) {
       adminNotes: body.admin_notes || body.adminNotes || null,
     }
     
+
+    
+    // Prevent duplicates by sourceUrl
+    if (data.sourceUrl) {
+      const existing = await prisma.scholarship.findFirst({
+        where: { sourceUrl: data.sourceUrl }
+      })
+      if (existing) {
+        return NextResponse.json(
+          { error: 'Scholarship with this Source URL already exists', existingId: existing.id }, 
+          { status: 409 }
+        )
+      }
+    }
+
     const scholarship = await prisma.scholarship.create({ data })
     
     return NextResponse.json(scholarship, { status: 201 })
