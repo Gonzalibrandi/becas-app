@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import DashboardLayout from "@/features/scholarships/DashboardLayout"; // <--- Importamos el nuevo cerebro
+import DashboardLayout from "@/features/scholarships/DashboardLayout";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

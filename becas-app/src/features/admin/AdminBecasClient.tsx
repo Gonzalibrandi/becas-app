@@ -220,7 +220,7 @@ export default function AdminBecasClient({
                         Editar
                       </Button>
                       <Link
-                        href={`/becas/${s.slug}`}
+                        href={`/scholarship/${s.slug}`}
                         target="_blank"
                         className="text-slate-400 hover:text-slate-600 p-1"
                       >

@@ -3,9 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Sparkles, Globe, MapPin, Calendar, DollarSign, BookOpen, Wallet, Save } from "lucide-react";
-import { Input, Textarea, Select } from "@/components/Input";
-import { Button } from "@/components/Button";
-import { Card } from "@/components/Card";
+import { Input, Textarea, Select, Button, Card } from "@/components";
 
 interface ScholarshipFormProps {
   initialData?: any;

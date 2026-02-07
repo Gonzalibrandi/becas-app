@@ -21,7 +21,7 @@ export default function ScholarshipCard({ scholarship }: ScholarshipCardProps) {
 
   return (
     <Link 
-      href={`/becas/${scholarship.slug}`} 
+      href={`/scholarship/${scholarship.slug}`} 
       className="group block bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden"
     >
       {/* Card Top */}

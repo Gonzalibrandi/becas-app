@@ -1,7 +1,7 @@
 import prisma from "@/lib/prisma";
 import { GraduationCap, X } from "lucide-react";
-import ScholarshipFilters from "@/features/scholarships/components/ScholarshipFilters";
-import ScholarshipCard from "@/features/scholarships/components/ScholarshipCard";
+import ScholarshipFilters from "@/features/scholarships/ScholarshipFilters";
+import ScholarshipCard from "@/features/scholarships/ScholarshipCard";
 import { Button, Card, Badge, SectionHeader, Title, Subtitle } from "@/components";
 import { getFundingInfo, getEducationInfo } from "@/lib/constants";
 import SearchBar from "@/components/SearchBar";

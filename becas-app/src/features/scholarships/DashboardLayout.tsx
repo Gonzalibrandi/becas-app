@@ -4,7 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, User, Settings, Menu, X, GraduationCap, BookOpen, Heart, Bell } from "lucide-react";
-import SearchBar from "../../components/SearchBar";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
