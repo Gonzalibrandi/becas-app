@@ -41,10 +41,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {/* Container with responsive padding and max-width */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
           
-          {/* Mobile Search (shown only on mobile) */}
-          <div className="mb-6">
-            <SearchBar />
-          </div>
 
           {/* Page Content */}
           {children}

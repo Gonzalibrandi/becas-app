@@ -1,9 +1,10 @@
 import prisma from "@/lib/prisma";
-import { GraduationCap } from "lucide-react";
+import { GraduationCap, X } from "lucide-react";
 import ScholarshipFilters from "@/features/scholarships/components/ScholarshipFilters";
 import ScholarshipCard from "@/features/scholarships/components/ScholarshipCard";
 import { Button, Card, Badge, SectionHeader, Title, Subtitle } from "@/components";
 import { getFundingInfo, getEducationInfo } from "@/lib/constants";
+import SearchBar from "@/components/SearchBar";
 
 // Force dynamic rendering - page fetches from database
 export const dynamic = 'force-dynamic';
@@ -112,12 +113,21 @@ export default async function Home({
         <div className="flex items-center gap-3">
           <ScholarshipFilters countries={countries} areaOptions={studyAreas} />
           {hasFilters && (
-            <Button href="/" variant="ghost" size="sm">
-              Limpiar filtros
+            <Button 
+              href="/" 
+              variant="outline" 
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium bg-red-50 text-red-600 border-2 border-red-200 hover:border-red-300 hover:bg-red-100 transition-all group"
+            >
+              <X size={18} className="group-hover:rotate-90 transition-transform duration-300" />
+              <span>Limpiar</span>
             </Button>
           )}
         </div>
       </SectionHeader>
+
+      <div className="mb-6">
+        <SearchBar />
+      </div>
 
       {/* Active Filters Display */}
       {hasFilters && (

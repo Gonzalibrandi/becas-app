@@ -74,8 +74,8 @@ export default function AdminBecasClient({
         subtitle="Gestiona todas las becas del sistema"
       >
         <div className="flex gap-2">
-          <Button href="/admin/scholarships/import-from-argentina-government" variant="outline" size="md">
-            <GraduationCap size={18} />
+          <Button href="/admin/scholarships/import-from-argentina-government" variant="outline" size="md" className="hover:border-emerald-300 hover:bg-emerald-100 transition-all group">
+            <GraduationCap size={18}/>
             <span>Importar Argentina.gob.ar</span>
           </Button>
           <Button href="/admin/scholarships/add-scholarship" variant="primary" size="md">
