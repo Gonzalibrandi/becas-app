@@ -1,6 +1,6 @@
-import AdminLayout from "@/features/admin/AdminLayout";
-import prisma from "@/lib/prisma";
-import AdminBecasClient from "../../../features/admin/AdminBecasClient";
+import AdminLayout from "../_components/AdminLayout";
+import prisma from "@/lib/db/prisma";
+import AdminBecasClient from "../_components/AdminBecasClient";
 
 export const dynamic = 'force-dynamic';
 

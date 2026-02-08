@@ -62,3 +62,17 @@ model AdminUser {
   @@map("admin_users")
 }
 
+model User {
+  id           String   @id @default(uuid())
+  firstName    String
+  lastName     String
+  username     String   @unique
+  passwordHash String   @map("password_hash")
+  email        String   @unique
+  isActive     Boolean  @default(true) @map("is_active")
+  lastLogin    DateTime? @map("last_login")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}

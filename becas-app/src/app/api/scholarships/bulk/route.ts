@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import prisma from '@/lib/prisma'
-import { requireAuth } from '@/lib/auth'
+import prisma from '@/lib/db/prisma'
+import { requireAuth } from '@/lib/auth/admin'
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic'

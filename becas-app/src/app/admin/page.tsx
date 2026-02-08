@@ -1,24 +1,43 @@
-import AdminLayout from "@/features/admin/AdminLayout";
-import StatusBadge from "@/features/admin/StatusBadge";
-import prisma from "@/lib/prisma";
-import { GraduationCap, Clock, CheckCircle, Archive, FileEdit, TrendingUp, ArrowRight } from "lucide-react";
+import AdminLayout from "./_components/AdminLayout";
+import StatusBadge from "./_components/StatusBadge";
+import prisma from "@/lib/db/prisma";
+import { 
+  GraduationCap, Clock, CheckCircle, Archive, FileEdit, TrendingUp, ArrowRight, 
+  Users, UserPlus, Sparkles 
+} from "lucide-react";
 import Link from "next/link";
 
 export const dynamic = 'force-dynamic';
 
 async function getStats() {
+  const now = new Date();
+  const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+  const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
   try {
-    const [draft, review, published, archived, total] = await Promise.all([
+    const [
+      draft, review, published, archived, totalScholarships,
+      totalUsers, newScholarships7d, newUsers30d
+    ] = await Promise.all([
       prisma.scholarship.count({ where: { status: "DRAFT" } }),
       prisma.scholarship.count({ where: { status: "REVIEW" } }),
       prisma.scholarship.count({ where: { status: "PUBLISHED" } }),
       prisma.scholarship.count({ where: { status: "ARCHIVED" } }),
       prisma.scholarship.count(),
+      prisma.user.count(),
+      prisma.scholarship.count({ where: { createdAt: { gte: sevenDaysAgo } } }),
+      prisma.user.count({ where: { createdAt: { gte: thirtyDaysAgo } } }),
     ]);
-    return { draft, review, published, archived, total };
+    return { 
+      draft, review, published, archived, totalScholarships,
+      totalUsers, newScholarships7d, newUsers30d
+    };
   } catch (error) {
     console.error("Error getting stats:", error);
-    return { draft: 0, review: 0, published: 0, archived: 0, total: 0 };
+    return { 
+      draft: 0, review: 0, published: 0, archived: 0, totalScholarships: 0,
+      totalUsers: 0, newScholarships7d: 0, newUsers30d: 0
+    };
   }
 }
 
@@ -26,6 +45,7 @@ async function getRecentScholarships() {
   try {
     return await prisma.scholarship.findMany({
       take: 5,
+      orderBy: { createdAt: "desc" },
       select: {
         id: true,
         title: true,
@@ -43,12 +63,44 @@ export default async function AdminDashboard() {
   const stats = await getStats();
   const recent = await getRecentScholarships();
 
+  // Main metrics cards (new)
+  const mainMetrics = [
+    { 
+      label: "Total Usuarios", 
+      value: stats.totalUsers, 
+      icon: Users,
+      bgLight: "bg-purple-50",
+      textColor: "text-purple-600"
+    },
+    { 
+      label: "Total Becas", 
+      value: stats.totalScholarships, 
+      icon: GraduationCap,
+      bgLight: "bg-emerald-50",
+      textColor: "text-emerald-600"
+    },
+    { 
+      label: "Becas Nuevas (7d)", 
+      value: stats.newScholarships7d, 
+      icon: Sparkles,
+      bgLight: "bg-blue-50",
+      textColor: "text-blue-600"
+    },
+    { 
+      label: "Usuarios Nuevos (30d)", 
+      value: stats.newUsers30d, 
+      icon: UserPlus,
+      bgLight: "bg-pink-50",
+      textColor: "text-pink-600"
+    },
+  ];
+
+  // Scholarship status cards
   const statCards = [
     { 
       label: "Borradores", 
       value: stats.draft, 
       icon: FileEdit, 
-      gradient: "from-amber-500 to-orange-500",
       bgLight: "bg-amber-50",
       textColor: "text-amber-600"
     },
@@ -56,7 +108,6 @@ export default async function AdminDashboard() {
       label: "En Revisión", 
       value: stats.review, 
       icon: Clock, 
-      gradient: "from-blue-500 to-indigo-500",
       bgLight: "bg-blue-50",
       textColor: "text-blue-600"
     },
@@ -64,7 +115,6 @@ export default async function AdminDashboard() {
       label: "Publicadas", 
       value: stats.published, 
       icon: CheckCircle, 
-      gradient: "from-emerald-500 to-teal-500",
       bgLight: "bg-emerald-50",
       textColor: "text-emerald-600"
     },
@@ -72,7 +122,6 @@ export default async function AdminDashboard() {
       label: "Archivadas", 
       value: stats.archived, 
       icon: Archive, 
-      gradient: "from-slate-500 to-gray-500",
       bgLight: "bg-slate-50",
       textColor: "text-slate-600"
     },
@@ -96,43 +145,46 @@ export default async function AdminDashboard() {
           </Link>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {statCards.map((card) => (
+        {/* Main Metrics - NEW */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {mainMetrics.map((metric) => (
             <div 
-              key={card.label} 
+              key={metric.label} 
               className="bg-white rounded-xl shadow-sm p-4 border border-gray-100 hover:shadow-md transition-shadow"
             >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-medium text-gray-500">{card.label}</p>
-                  <p className="text-2xl font-bold text-gray-900 mt-1">{card.value}</p>
+              <div className="flex items-center gap-3">
+                <div className={`w-11 h-11 rounded-xl ${metric.bgLight} flex items-center justify-center`}>
+                  <metric.icon className={metric.textColor} size={22} />
                 </div>
-                <div className={`w-10 h-10 rounded-xl ${card.bgLight} flex items-center justify-center`}>
-                  <card.icon className={card.textColor} size={20} />
+                <div>
+                  <p className="text-2xl font-bold text-gray-900">{metric.value}</p>
+                  <p className="text-xs font-medium text-gray-500">{metric.label}</p>
                 </div>
               </div>
             </div>
           ))}
         </div>
 
-        {/* Total Card */}
-        <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 rounded-xl shadow-xl p-5 text-white relative overflow-hidden">
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute -right-10 -top-10 w-32 h-32 bg-white rounded-full" />
-            <div className="absolute -left-10 -bottom-10 w-24 h-24 bg-white rounded-full" />
-          </div>
-          <div className="flex items-center gap-4 relative z-10">
-            <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-              <GraduationCap size={28} />
-            </div>
-            <div>
-              <p className="text-emerald-100 text-sm font-medium flex items-center gap-2">
-                <TrendingUp size={14} />
-                Total de Becas
-              </p>
-              <p className="text-3xl font-bold mt-0.5">{stats.total}</p>
-            </div>
+        {/* Scholarship Status Cards */}
+        <div>
+          <h3 className="text-sm font-semibold text-gray-500 mb-3">Estado de Becas</h3>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            {statCards.map((card) => (
+              <div 
+                key={card.label} 
+                className="bg-white rounded-xl shadow-sm p-4 border border-gray-100"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs font-medium text-gray-500">{card.label}</p>
+                    <p className="text-xl font-bold text-gray-900 mt-1">{card.value}</p>
+                  </div>
+                  <div className={`w-9 h-9 rounded-lg ${card.bgLight} flex items-center justify-center`}>
+                    <card.icon className={card.textColor} size={18} />
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 

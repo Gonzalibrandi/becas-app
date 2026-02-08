@@ -1,5 +1,5 @@
-import AdminLayout from "@/features/admin/AdminLayout";
-import ScholarshipForm from "@/features/admin/ScholarshipForm";
+import AdminLayout from "../../_components/AdminLayout";
+import ScholarshipForm from "../../_components/ScholarshipForm";
 import { Sparkles } from "lucide-react";
 
 export default function NewScholarshipPage() {

@@ -1,6 +1,6 @@
-import AdminLayout from "@/features/admin/AdminLayout";
-import ScholarshipForm from "@/features/admin/ScholarshipForm";
-import prisma from "@/lib/prisma";
+import AdminLayout from "../../_components/AdminLayout";
+import ScholarshipForm from "../../_components/ScholarshipForm";
+import prisma from "@/lib/db/prisma";
 import { notFound } from "next/navigation";
 
 export const dynamic = 'force-dynamic';
