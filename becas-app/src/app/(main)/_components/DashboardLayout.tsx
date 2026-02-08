@@ -60,7 +60,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           fixed top-16 left-0 bottom-0 z-20
           bg-white border-r border-gray-200
           transition-all duration-300
-          ${sidebarCollapsed ? "w-[72px]" : "w-64"}
+          ${sidebarCollapsed ? "w-[52px]" : "w-64"}
         `}>
           <nav className="flex-1 p-3 space-y-1">
             {navItems.map((item) => {
@@ -103,7 +103,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-gray-500 hover:bg-gray-100 transition-colors text-sm"
             >
               {sidebarCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
-              {!sidebarCollapsed && <span>Colapsar</span>}
             </button>
           </div>
         </aside>
