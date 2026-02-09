@@ -26,7 +26,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return <>{children}</>;
   }
 
-  const navItems = [
+  const navItems: {
+    href: string;
+    icon: any;
+    label: string;
+    disabled?: boolean;
+    badge?: string;
+  }[] = [
     { href: "/", icon: Home, label: "Explorar" },
     { href: "/saved", icon: Heart, label: "Mis Guardadas" },
     { href: "/profile", icon: User, label: "Mi Perfil" },
