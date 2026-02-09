@@ -7,7 +7,19 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Scholarship model - clean version without Django legacy
+// ============================================
+// ENUMS
+// ============================================
+
+enum AlertFrequency {
+  DAILY
+  WEEKLY
+}
+
+// ============================================
+// SCHOLARSHIP & CATEGORIES
+// ============================================
+
 model Scholarship {
   id             String    @id @default(uuid())
   slug           String    @unique
@@ -30,11 +42,15 @@ model Scholarship {
   fundingType    String    @default("UNKNOWN") @map("funding_type")
   educationLevel String    @default("OTHER") @map("education_level")
   
-  // Rich content
+  // Rich content (legacy field - will be migrated to categories)
   areas          String    @default("")
   benefits       String    @default("")
   requirements   String    @default("")
   duracion       String    @default("")
+  
+  // Relations
+  categories     Category[]           // Many-to-Many with Category
+  savedByUsers   User[]    @relation("SavedScholarships") // Many-to-Many favorites
   
   // Admin
   status         String    @default("DRAFT")
@@ -48,7 +64,24 @@ model Scholarship {
   @@map("scholarships")
 }
 
-// Admin users with hashed passwords
+model Category {
+  id            String        @id @default(uuid())
+  name          String        @unique  // "Ingeniería"
+  slug          String        @unique  // "ingenieria"
+  
+  // Relations
+  scholarships  Scholarship[]
+  
+  // Timestamps
+  createdAt     DateTime      @default(now()) @map("created_at")
+
+  @@map("categories")
+}
+
+// ============================================
+// USERS & AUTH
+// ============================================
+
 model AdminUser {
   id           String   @id @default(uuid())
   username     String   @unique
@@ -74,5 +107,37 @@ model User {
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
+  // Relations
+  savedScholarships Scholarship[]      @relation("SavedScholarships") // Favorites
+  alerts            ScholarshipAlert[]
+
   @@map("users")
+}
+
+// ============================================
+// ALERTS / SAVED SEARCHES
+// ============================================
+
+model ScholarshipAlert {
+  id          String          @id @default(uuid())
+  name        String          @default("Mi Alerta")
+  
+  // Search criteria stored as JSON
+  // Example: { "categories": ["ingenieria"], "countries": ["España"], "fundingType": "FULL" }
+  criteria    Json            @default("{}")
+  
+  // Notification settings
+  frequency   AlertFrequency  @default(WEEKLY)
+  isActive    Boolean         @default(true) @map("is_active")
+  lastSentAt  DateTime?       @map("last_sent_at")
+  
+  // Relations
+  userId      String          @map("user_id")
+  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Timestamps
+  createdAt   DateTime        @default(now()) @map("created_at")
+  updatedAt   DateTime        @updatedAt @map("updated_at")
+
+  @@map("scholarship_alerts")
 }

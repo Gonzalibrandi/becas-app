@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import * as cheerio from 'cheerio';
 import OpenAI from 'openai';
+import { CATEGORIES } from '@/lib/utils/categories';
 
 export const maxDuration = 60; // Allow 60 seconds for scraping (Vercel limit)
 
@@ -113,6 +114,11 @@ export async function POST(request: NextRequest) {
       throw new Error("OpenAI API key not configured");
     }
 
+    // Build category list for the prompt
+    const categoryList = CATEGORIES.map(cat => 
+      `  - "${cat.slug}": ${cat.name} (ej: ${cat.examples.slice(0, 2).join(', ')})`
+    ).join('\n');
+
     const prompt = `
 Eres un extractor de datos experto para becas educativas. Tu objetivo es analizar el texto de una convocatoria y generar un JSON VÁLIDO que cumpla EXACTAMENTE con el esquema especificado.
 
@@ -164,20 +170,28 @@ URL de Origen: {source_url}
    - "SHORT_COURSE" = Curso corto/Capacitación
    - "OTHER" = Otro o no especificado
 
+=== CATEGORÍAS (IMPORTANTE - NUEVO CAMPO) ===
+
+8. "category_slugs" (array de strings):
+   - Asigna entre 1 y 5 categorías que mejor representen la beca
+   - USA SOLO estos slugs exactos:
+${categoryList}
+
+   EJEMPLOS DE CLASIFICACIÓN:
+   - "Beca para Maestría en IA" → ["tecnologia-informatica", "ingenieria"]
+   - "Beca Derecho Internacional y DDHH" → ["derecho", "derechos-humanos"]
+   - "Beca abierta a cualquier área" → ["multidisciplinario"]
+   - "Beca en Energía Solar y Medio Ambiente" → ["energias-renovables", "medio-ambiente", "ingenieria"]
+   - "Formación para profesores de inglés" → ["formacion-docente", "idiomas-traduccion", "educacion"]
+
 === CAMPOS DE TEXTO LIBRE (string vacío "" si no hay info) ===
 
-8. "areas" (string, max 500 chars): 
-   - Áreas de estudio, UNA POR LÍNEA separadas por salto de línea (\\n)
-   - Ejemplo: "Ingeniería\\nCiencias Sociales\\nArte\\nMedicina"
-   - Si aplica a todas: "Todas las áreas"
-   - Cada área en una línea separada, sin viñetas ni guiones
-   - Si no hay info: ""
 
 9. "benefits" (string): 
-   - Lista de beneficios, UNO POR LÍNEA separados por salto de línea (\\n)
+    - Lista de beneficios, UNO POR LÍNEA separados por salto de línea (\\n)
    - Ejemplo: "Pasajes aéreos ida y vuelta\\nAlojamiento completo\\nSeguro médico\\nEstipendio mensual de 1500 USD"
    - Cada beneficio en una línea separada, sin viñetas ni guiones
-   - Si no hay info: ""
+    - Si no hay info: ""
 
 10. "requirements" (string): 
     - Requisitos principales, UNO POR LÍNEA separados por salto de línea (\\n)
@@ -210,6 +224,7 @@ URL de Origen: {source_url}
 - Usa null para campos de fecha/URL cuando no hay información
 - Usa "" (string vacío) para campos de texto libre cuando no hay información
 - Los valores de funding_type y education_level deben ser EXACTAMENTE como se especifican (MAYÚSCULAS)
+- Para category_slugs, usa SOLO los slugs listados arriba (minúsculas con guiones)
 - No inventes información que no esté en el texto
 
 === TEXTO A ANALIZAR ===
@@ -227,6 +242,20 @@ ${textContent}
     });
 
     const data = JSON.parse(aiResponse.choices[0].message.content || '{}');
+
+    // Validate and filter category_slugs to ensure they match our predefined categories
+    const validCategorySlugs = CATEGORIES.map(c => c.slug);
+    if (data.category_slugs && Array.isArray(data.category_slugs)) {
+      data.category_slugs = data.category_slugs.filter(
+        (slug: string) => validCategorySlugs.includes(slug)
+      );
+      // Default to multidisciplinario if no valid categories
+      if (data.category_slugs.length === 0) {
+        data.category_slugs = ['multidisciplinario'];
+      }
+    } else {
+      data.category_slugs = ['multidisciplinario'];
+    }
 
     // Fallback URL logic
     if (!data.apply_url && officialUrlDirect) data.apply_url = officialUrlDirect;

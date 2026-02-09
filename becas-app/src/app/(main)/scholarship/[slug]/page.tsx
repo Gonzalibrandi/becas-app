@@ -6,19 +6,20 @@ import {
   ArrowLeft, 
   Calendar, 
   MapPin, 
-  DollarSign, 
-  GraduationCap, 
   Clock, 
   ExternalLink,
   CheckCircle,
   BookOpen,
   Target,
   Share2,
-  Heart
+  GraduationCap
 } from "lucide-react";
+import FavoriteButton from "../../_components/FavoriteButton";
 
 // Force dynamic rendering - page fetches from database
 export const dynamic = 'force-dynamic';
+
+
 
 // Fetch scholarship directly from Prisma by slug
 async function getScholarship(slug: string) {
@@ -235,10 +236,7 @@ export default async function ScholarshipPage({ params }: { params: Promise<{ sl
 
               {/* Action buttons */}
               <div className="flex gap-3 mt-4">
-                <button className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border border-gray-200 text-gray-500 hover:text-red-500 hover:border-red-200 hover:bg-red-50 transition-all">
-                  <Heart size={18} />
-                  <span className="text-sm font-medium">Guardar</span>
-                </button>
+                <FavoriteButton scholarshipId={beca.id} />
                 <button className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border border-gray-200 text-gray-500 hover:text-blue-500 hover:border-blue-200 hover:bg-blue-50 transition-all">
                   <Share2 size={18} />
                   <span className="text-sm font-medium">Compartir</span>

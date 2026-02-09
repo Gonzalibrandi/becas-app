@@ -144,11 +144,43 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const scholarship = await prisma.scholarship.create({ data })
+    // Extract category_slugs from body (comes from AI classification)
+    const categorySlugs: string[] = body.category_slugs || body.categorySlugs || [];
+
+    // Create scholarship first
+    const scholarship = await prisma.scholarship.create({ 
+      data,
+    });
+
+    // Connect categories if provided
+    if (categorySlugs.length > 0) {
+      const categories = await prisma.category.findMany({
+        where: { slug: { in: categorySlugs } },
+        select: { id: true }
+      });
+
+      if (categories.length > 0) {
+        await prisma.scholarship.update({
+          where: { id: scholarship.id },
+          data: {
+            categories: {
+              connect: categories.map(c => ({ id: c.id }))
+            }
+          }
+        });
+      }
+    }
+
+    // Fetch the scholarship with categories included
+    const result = await prisma.scholarship.findUnique({
+      where: { id: scholarship.id },
+      include: { categories: true }
+    });
     
-    return NextResponse.json(scholarship, { status: 201 })
+    return NextResponse.json(result, { status: 201 })
   } catch (error) {
     console.error('Error creating scholarship:', error)
     return NextResponse.json({ error: 'Failed to create scholarship', details: String(error) }, { status: 400 })
   }
 }
+

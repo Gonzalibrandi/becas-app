@@ -2,16 +2,24 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { 
   Home, User, Heart, Bell, HelpCircle, 
-  Menu, X, GraduationCap, ChevronLeft, ChevronRight 
+  Menu, X, GraduationCap, ChevronLeft, ChevronRight, LogOut 
 } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { isAuthenticated, logout } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  const handleLogout = async () => {
+    await logout();
+    router.push("/");
+  };
 
   // Don't show this layout on admin pages
   if (pathname.startsWith("/admin")) {
@@ -22,7 +30,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     { href: "/", icon: Home, label: "Explorar" },
     { href: "/saved", icon: Heart, label: "Mis Guardadas" },
     { href: "/profile", icon: User, label: "Mi Perfil" },
-    { href: "#", icon: Bell, label: "Alertas", disabled: true, badge: "Pronto" },
+    { href: "/alerts", icon: Bell, label: "Alertas" },
     { href: "/help", icon: HelpCircle, label: "Ayuda" },
   ];
 
@@ -96,8 +104,21 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             })}
           </nav>
 
-          {/* Collapse button */}
-          <div className="p-3 border-t border-gray-100">
+          {/* Bottom section: Logout + Collapse */}
+          <div className="p-3 border-t border-gray-100 space-y-1">
+            {isAuthenticated && (
+              <button
+                onClick={handleLogout}
+                className={`
+                  w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 text-sm
+                  text-red-600 hover:bg-red-50
+                `}
+                title={sidebarCollapsed ? "Cerrar sesión" : undefined}
+              >
+                <LogOut size={20} />
+                {!sidebarCollapsed && <span>Cerrar sesión</span>}
+              </button>
+            )}
             <button
               onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
               className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-gray-500 hover:bg-gray-100 transition-colors text-sm"
@@ -159,6 +180,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     </Link>
                   );
                 })}
+                {isAuthenticated && (
+                  <button
+                    onClick={() => {
+                      handleLogout();
+                      setSidebarOpen(false);
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 transition-all duration-200 mt-2"
+                  >
+                    <LogOut size={22} />
+                    <span className="flex-1 text-left">Cerrar sesión</span>
+                  </button>
+                )}
               </nav>
             </aside>
           </>

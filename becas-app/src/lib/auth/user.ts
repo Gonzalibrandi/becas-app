@@ -188,3 +188,34 @@ export async function updateUserProfile(
     return null;
   }
 }
+
+// ============ API Route Auth Helper ============
+
+import { NextResponse } from 'next/server';
+
+type AuthResult = 
+  | { authenticated: true; user: SafeUser }
+  | { authenticated: false; errorResponse: NextResponse; user?: undefined };
+
+/**
+ * Require user authentication for API routes.
+ * Returns the current user or an error response.
+ */
+export async function requireUserAuth(): Promise<AuthResult> {
+  const user = await getCurrentUser();
+  
+  if (!user) {
+    return {
+      authenticated: false,
+      errorResponse: NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      ),
+    };
+  }
+
+  return {
+    authenticated: true,
+    user,
+  };
+}

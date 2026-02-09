@@ -1,6 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { X, Heart, LogIn, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui";
 
@@ -11,24 +13,46 @@ interface AuthModalProps {
 
 export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
 
-  if (!isOpen) return null;
+  // Ensure we only render on client to avoid hydration errors
+  useEffect(() => {
+    setMounted(true);
+    
+    // Block body scroll when modal is open
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    
+    return () => { 
+      document.body.style.overflow = 'unset'; 
+    };
+  }, [isOpen]);
 
-  const handleLogin = () => {
+  if (!isOpen || !mounted) return null;
+
+  const handleLogin = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
     onClose();
     router.push("/login");
   };
 
-  const handleRegister = () => {
+  const handleRegister = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
     onClose();
     router.push("/register");
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+  // Use createPortal to render modal at document.body level
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
         onClick={onClose}
       />
 
@@ -45,7 +69,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
         {/* Icon */}
         <div className="flex justify-center mb-4">
           <div className="w-16 h-16 bg-gradient-to-br from-rose-100 to-pink-100 rounded-full flex items-center justify-center">
-            <Heart className="text-rose-500" size={32} />
+            <Heart className="text-rose-500 fill-rose-500" size={32} />
           </div>
         </div>
 
@@ -90,6 +114,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
           Ahora no, gracias
         </button>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

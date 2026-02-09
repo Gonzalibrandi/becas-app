@@ -1,11 +1,9 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import { Calendar, MapPin, ArrowRight, Heart } from "lucide-react";
+import { Calendar, MapPin, ArrowRight } from "lucide-react";
 import { getFundingInfo } from "@/lib/utils/constants";
-import { useAuth } from "@/context/AuthContext";
-import AuthModal from "@/app/(auth)/_components/AuthModal";
+import FavoriteButton from "./FavoriteButton";
 
 type ScholarshipCardProps = {
   scholarship: {
@@ -20,24 +18,7 @@ type ScholarshipCardProps = {
 };
 
 export default function ScholarshipCard({ scholarship }: ScholarshipCardProps) {
-  const { isAuthenticated } = useAuth();
-  const [showAuthModal, setShowAuthModal] = useState(false);
-  const [isFavorite, setIsFavorite] = useState(false);
-
   const funding = getFundingInfo(scholarship.fundingType);
-
-  const handleFavoriteClick = (e: React.MouseEvent) => {
-    e.preventDefault(); // Prevent link navigation
-    e.stopPropagation();
-
-    if (!isAuthenticated) {
-      setShowAuthModal(true);
-      return;
-    }
-
-    // TODO: Implement actual favorite toggle with API
-    setIsFavorite(!isFavorite);
-  };
 
   return (
     <>
@@ -46,20 +27,9 @@ export default function ScholarshipCard({ scholarship }: ScholarshipCardProps) {
         className="group block bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden relative"
       >
         {/* Favorite Button */}
-        <button
-          onClick={handleFavoriteClick}
-          className={`absolute top-4 right-4 z-10 p-2 rounded-full transition-all duration-200 ${
-            isFavorite
-              ? "bg-rose-100 text-rose-500"
-              : "bg-white/80 text-gray-400 hover:bg-rose-50 hover:text-rose-500"
-          } shadow-sm backdrop-blur-sm`}
-          aria-label={isFavorite ? "Quitar de favoritos" : "Agregar a favoritos"}
-        >
-          <Heart
-            size={18}
-            className={isFavorite ? "fill-current" : ""}
-          />
-        </button>
+        <div className="absolute top-4 right-4 z-10">
+          <FavoriteButton scholarshipId={scholarship.id} variant="card" />
+        </div>
 
         {/* Card Top */}
         <div className="h-2 bg-gradient-to-r from-emerald-500 to-teal-500" />
@@ -107,10 +77,6 @@ export default function ScholarshipCard({ scholarship }: ScholarshipCardProps) {
           </div>
         </div>
       </Link>
-
-      {/* Auth Modal */}
-      <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
     </>
   );
 }
-

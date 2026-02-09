@@ -135,4 +135,3 @@ export default function ProfileForm({ user, updateAction }: ProfileFormProps) {
     </div>
   );
 }
-

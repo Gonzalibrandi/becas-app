@@ -13,7 +13,7 @@ type FilterParams = {
   country?: string;
   funding?: string;
   level?: string;
-  area?: string;
+  category?: string; // (uses slug)
 };
 
 // Get unique countries for filter dropdown
@@ -33,17 +33,14 @@ async function getCountries(): Promise<string[]> {
   }
 }
 
-async function getStudyAreas(): Promise<string[]> {
+// Get categories from database
+async function getCategories(): Promise<{ name: string; slug: string }[]> {
   try {
-    const scholarships = await prisma.scholarship.findMany({
-      where: { status: "PUBLISHED" },
-      select: { areas: true },
-      distinct: ["areas"],
+    const categories = await prisma.category.findMany({
+      orderBy: { name: 'asc' },
+      select: { name: true, slug: true }
     });
-    return scholarships
-      .map(s => s.areas)
-      .filter((a): a is string => Boolean(a))
-      .sort();
+    return categories;
   } catch {
     return [];
   }
@@ -59,7 +56,7 @@ async function getScholarships(filters: FilterParams) {
         OR: [
           { title: { contains: filters.search } },
           { country: { contains: filters.search } },
-          { areas: { contains: filters.search } },
+          { categories: { some: { name: { contains: filters.search } } } },
         ],
       });
     }
@@ -67,7 +64,8 @@ async function getScholarships(filters: FilterParams) {
     if (filters.country) conditions.push({ country: filters.country });
     if (filters.funding) conditions.push({ fundingType: filters.funding });
     if (filters.level) conditions.push({ educationLevel: filters.level });
-    if (filters.area) conditions.push({ areas: { contains: filters.area } });
+    // Filter by category slug using relation
+    if (filters.category) conditions.push({ categories: { some: { slug: filters.category } } });
 
     return await prisma.scholarship.findMany({
       where: { AND: conditions },
@@ -80,7 +78,7 @@ async function getScholarships(filters: FilterParams) {
         fundingType: true,
         educationLevel: true,
         description: true,
-        areas: true,
+        categories: { select: { name: true, slug: true } },
       },
       orderBy: { deadline: "asc" },
     });
@@ -98,9 +96,9 @@ export default async function Home({
   const params = await searchParams;
   const scholarships = await getScholarships(params);
   const countries = await getCountries();
-  const studyAreas = await getStudyAreas();
+  const categories = await getCategories();
   
-  const hasFilters = params.search || params.country || params.funding || params.level || params.area;
+  const hasFilters = params.search || params.country || params.funding || params.level || params.category;
 
   return (
     <div className="space-y-6 sm:space-y-8">
@@ -168,7 +166,7 @@ export default async function Home({
         </div>
         
         <div className="flex items-center gap-3">
-          <ScholarshipFilters countries={countries} areaOptions={studyAreas} />
+          <ScholarshipFilters countries={countries} categories={categories} />
           {hasFilters && (
             <Button 
               href="/" 
@@ -198,8 +196,10 @@ export default async function Home({
               {getEducationInfo(params.level).label}
             </Badge>
           )}
-          {params.area && (
-            <Badge color="blue" icon="📍">{params.area}</Badge>
+          {params.category && (
+            <Badge color="blue" icon="🎓">
+              {categories.find(c => c.slug === params.category)?.name || params.category}
+            </Badge>
           )}
         </div>
       )}

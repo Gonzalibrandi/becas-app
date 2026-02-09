@@ -1,7 +1,60 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser, updateUserProfile } from "@/lib/auth/user";
 import ProfileForm from "./ProfileForm";
-import { User, Calendar, Heart, Star } from "lucide-react";
+import AlertsManager from "../alerts/AlertsManager";
+import prisma from "@/lib/db/prisma";
+import { User, Calendar, Heart, Star, Bell } from "lucide-react";
+
+export const dynamic = 'force-dynamic';
+
+// Get categories and countries for alerts
+async function getAlertData() {
+  const [categories, scholarships] = await Promise.all([
+    prisma.category.findMany({
+      orderBy: { name: 'asc' },
+      select: { name: true, slug: true }
+    }),
+    prisma.scholarship.findMany({
+      where: { status: "PUBLISHED" },
+      select: { country: true },
+      distinct: ["country"],
+    })
+  ]);
+
+  const countries = scholarships
+    .map(s => s.country)
+    .filter((c): c is string => Boolean(c))
+    .sort();
+
+  return { categories, countries };
+}
+
+// Get user stats
+async function getUserStats(userId: string) {
+  const [favoritesCount, alertsCount] = await Promise.all([
+    // Count saved scholarships using the relation
+    prisma.scholarship.count({
+      where: {
+        savedByUsers: {
+          some: {
+            id: userId
+          }
+        },
+        status: "PUBLISHED"
+      }
+    }),
+    // Count alerts using the correct model name
+    prisma.scholarshipAlert.count({
+      where: { userId }
+    })
+  ]);
+
+  return { 
+    favoritesCount, 
+    alertsCount,
+    applicationsCount: 0 // Placeholder as Application model doesn't exist yet
+  };
+}
 
 export default async function ProfilePage() {
   const user = await getCurrentUser();
@@ -9,6 +62,12 @@ export default async function ProfilePage() {
   if (!user) {
     redirect("/login");
   }
+
+  // Fetch data in parallel
+  const [{ categories, countries }, stats] = await Promise.all([
+    getAlertData(),
+    getUserStats(user.id)
+  ]);
 
   // Server Action for profile update
   async function handleUpdateProfile(formData: FormData) {
@@ -74,21 +133,21 @@ export default async function ProfilePage() {
               <Heart size={14} />
               <span>Favoritas</span>
             </div>
-            <p className="text-2xl font-bold text-white">0</p>
+            <p className="text-2xl font-bold text-white">{stats.favoritesCount}</p>
           </div>
           <div className="text-center">
             <div className="flex items-center justify-center gap-1 text-white/60 text-sm mb-1">
               <Star size={14} />
               <span>Aplicadas</span>
             </div>
-            <p className="text-2xl font-bold text-white">0</p>
+            <p className="text-2xl font-bold text-white">{stats.applicationsCount}</p>
           </div>
           <div className="text-center">
             <div className="flex items-center justify-center gap-1 text-white/60 text-sm mb-1">
-              <User size={14} />
-              <span>Nivel</span>
+              <Bell size={14} />
+              <span>Alertas</span>
             </div>
-            <p className="text-2xl font-bold text-white">Nuevo</p>
+            <p className="text-2xl font-bold text-white">{stats.alertsCount}</p>
           </div>
         </div>
       </div>
@@ -98,7 +157,9 @@ export default async function ProfilePage() {
         <h2 className="text-xl font-bold text-gray-900 mb-4">Editar Perfil</h2>
         <ProfileForm user={user} updateAction={handleUpdateProfile} />
       </div>
+
+      {/* Alerts Section */}
+      <AlertsManager categories={categories} countries={countries} />
     </div>
   );
 }
-

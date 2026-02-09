@@ -6,8 +6,13 @@ import { useState } from "react";
 import { Filter, X, ChevronDown } from "lucide-react";
 import { FUNDING_TYPES, EDUCATION_LEVELS } from "@/lib/utils/constants";
 
+type Category = {
+  name: string;
+  slug: string;
+};
+
 // Inner component that uses useSearchParams
-function FiltersContent({ countries, areaOptions }: { countries: string[], areaOptions: string[] }) {
+function FiltersContent({ countries, categories }: { countries: string[], categories: Category[] }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   
@@ -16,7 +21,7 @@ function FiltersContent({ countries, areaOptions }: { countries: string[], areaO
     country: searchParams.get("country") || "",
     funding: searchParams.get("funding") || "",
     level: searchParams.get("level") || "",
-    area: searchParams.get("area") || "",
+    category: searchParams.get("category") || "",
   });
 
   const activeFiltersCount = Object.values(filters).filter(Boolean).length;
@@ -30,14 +35,14 @@ function FiltersContent({ countries, areaOptions }: { countries: string[], areaO
     if (filters.country) params.set("country", filters.country);
     if (filters.funding) params.set("funding", filters.funding);
     if (filters.level) params.set("level", filters.level);
-    if (filters.area) params.set("area", filters.area);
+    if (filters.category) params.set("category", filters.category);
     
     router.push(`/?${params.toString()}`);
     setIsOpen(false);
   };
 
   const clearFilters = () => {
-    setFilters({ country: "", funding: "", level: "", area: "" });
+    setFilters({ country: "", funding: "", level: "", category: "" });
     const search = searchParams.get("search");
     router.push(search ? `/?search=${search}` : "/");
     setIsOpen(false);
@@ -116,19 +121,19 @@ function FiltersContent({ countries, areaOptions }: { countries: string[], areaO
                 </select>
               </div>
 
-              {/* Study Area - NEW */}
+              {/* Category (Area de estudio) */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                   Área de estudio
                 </label>
                 <select
-                  value={filters.area}
-                  onChange={(e) => updateFilter("area", e.target.value)}
+                  value={filters.category}
+                  onChange={(e) => updateFilter("category", e.target.value)}
                   className="w-full px-4 py-2.5 bg-gray-50 border-2 border-gray-200 rounded-xl text-gray-900 font-medium focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all"
                 >
                   <option value="">Todas las áreas</option>
-                  {areaOptions.map((area) => (
-                    <option key={area} value={area}>{area}</option>
+                  {categories.map((cat) => (
+                    <option key={cat.slug} value={cat.slug}>{cat.name}</option>
                   ))}
                 </select>
               </div>
@@ -202,10 +207,10 @@ function FiltersFallback() {
 }
 
 // Main component wrapped in Suspense
-export default function ScholarshipFilters({ countries, areaOptions }: { countries: string[], areaOptions: string[] }) {
+export default function ScholarshipFilters({ countries, categories }: { countries: string[], categories: Category[] }) {
   return (
     <Suspense fallback={<FiltersFallback />}>
-      <FiltersContent countries={countries} areaOptions={areaOptions} />
+      <FiltersContent countries={countries} categories={categories} />
     </Suspense>
   );
 }
