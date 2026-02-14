@@ -3,6 +3,7 @@ import { validateCredentials, createSession } from '@/lib/auth/admin'
 
 export const dynamic = 'force-dynamic'
 
+// POST /api/auth/login - log in as admin
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()

@@ -1,9 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Sparkles, Globe, MapPin, Calendar, DollarSign, BookOpen, Wallet, Save } from "lucide-react";
+import { Sparkles, Globe, MapPin, Calendar, BookOpen, Wallet, Save, Plus, X, Tag, Star } from "lucide-react";
 import { Input, Textarea, Select, Button, Card } from "@/components/ui";
+import { CATEGORIES } from "@/lib/utils/categories";
+
+type Category = {
+  id: string;
+  name: string;
+  slug: string;
+};
+
+type Country = {
+  id: string;
+  name: string;
+  slug: string;
+};
 
 interface ScholarshipFormProps {
   initialData?: any;
@@ -32,23 +45,120 @@ export default function ScholarshipForm({ initialData, isEditing = false }: Scho
   const [scraping, setScraping] = useState(false);
   const [scrapeUrl, setScrapeUrl] = useState("");
   const [error, setError] = useState("");
-  const [rawResponse, setRawResponse] = useState<any>(null); // Debug: store raw AI response
+  const [rawResponse, setRawResponse] = useState<any>(null);
+
+  // Categories state
+  const [allCategories, setAllCategories] = useState<Category[]>([]);
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>(
+    initialData?.categories?.map((c: Category) => c.id) || []
+  );
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [creatingCategory, setCreatingCategory] = useState(false);
+
+  // Countries state
+  const [allCountries, setAllCountries] = useState<Country[]>([]);
+  const [selectedCountryIds, setSelectedCountryIds] = useState<string[]>(
+    initialData?.countries?.map((c: Country) => c.id) || []
+  );
+  const [newCountryName, setNewCountryName] = useState("");
+  const [creatingCountry, setCreatingCountry] = useState(false);
   
   const [formData, setFormData] = useState({
     title: initialData?.title || "",
     description: initialData?.description || "",
-    country: initialData?.country || "",
     deadline: initialData?.deadline?.split("T")[0] || "",
     startDate: initialData?.startDate?.split("T")[0] || "",
     fundingType: initialData?.fundingType || "UNKNOWN",
     educationLevel: initialData?.educationLevel || "OTHER",
-    areas: initialData?.areas || "ALL",
     benefits: initialData?.benefits || "",
     requirements: initialData?.requirements || "",
     duration: initialData?.duration || "",
     applyUrl: initialData?.applyUrl || "",
     officialUrl: initialData?.officialUrl || "",
+    isRecommended: initialData?.isRecommended || false,
   });
+
+  // Fetch categories on mount
+  // Fetch categories and countries on mount
+  useEffect(() => {
+    Promise.all([
+      fetch("/api/categories").then((res) => res.json()),
+      fetch("/api/countries").then((res) => res.json())
+    ])
+      .then(([cats, countries]) => {
+        setAllCategories(cats);
+        setAllCountries(countries);
+      })
+      .catch((err) => console.error("Failed to load data:", err));
+  }, []);
+
+  const toggleCategory = (id: string) => {
+    setSelectedCategoryIds((prev) =>
+      prev.includes(id) ? prev.filter((cid) => cid !== id) : [...prev, id]
+    );
+  };
+
+  const handleCreateCategory = async () => {
+    const name = newCategoryName.trim();
+    if (!name) return;
+
+    setCreatingCategory(true);
+    try {
+      const res = await fetch("/api/categories", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name }),
+      });
+      const cat: Category = await res.json();
+
+      // Add to list if not already present
+      setAllCategories((prev) =>
+        prev.find((c) => c.id === cat.id) ? prev : [...prev, cat].sort((a, b) => a.name.localeCompare(b.name))
+      );
+      // Auto-select the new/existing category
+      setSelectedCategoryIds((prev) =>
+        prev.includes(cat.id) ? prev : [...prev, cat.id]
+      );
+      setNewCategoryName("");
+    } catch (err) {
+      console.error("Failed to create category:", err);
+    } finally {
+      setCreatingCategory(false);
+    }
+  };
+
+  const toggleCountry = (id: string) => {
+    setSelectedCountryIds((prev) => 
+      prev.includes(id) ? prev.filter((cid) => cid !== id) : [...prev, id]
+    );
+  };
+
+  const handleCreateCountry = async () => {
+    const name = newCountryName.trim();
+    if (!name) return;
+
+    setCreatingCountry(true);
+    try {
+      const res = await fetch("/api/countries", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name }),
+      });
+      const country: Country = await res.json();
+
+      setAllCountries((prev) =>
+        prev.find((c) => c.id === country.id) ? prev : [...prev, country].sort((a, b) => a.name.localeCompare(b.name))
+      );
+      
+      // Auto-select
+      toggleCountry(country.id);
+      setNewCountryName("");
+    } catch (err) {
+      console.error("Failed to create country:", err);
+    } finally {
+      setCreatingCountry(false);
+    }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -76,20 +186,70 @@ export default function ScholarshipForm({ initialData, isEditing = false }: Scho
       setRawResponse(data);
       console.log("🤖 Raw AI Response:", data);
 
+      // Auto-select countries if they match existing ones
+      const scrapedCountries = (data.country || "").split(",").map((c: string) => c.trim()).filter(Boolean);
+      const foundCountryIds = allCountries
+        .filter(c => scrapedCountries.some(sc => 
+          sc.toLowerCase() === c.name.toLowerCase() || 
+          sc.toLowerCase() === c.slug.toLowerCase()
+        ))
+        .map(c => c.id);
+
+      if (foundCountryIds.length > 0) {
+        setSelectedCountryIds(foundCountryIds);
+      }
+
+      // Check for missing countries
+      const missingCountries = scrapedCountries.filter(sc => 
+        !allCountries.some(c => 
+          c.name.toLowerCase() === sc.toLowerCase() || 
+          c.slug.toLowerCase() === sc.toLowerCase()
+        )
+      );
+
+      if (missingCountries.length > 0) {
+        setNewCountryName(missingCountries[0]); // Propose the first missing country
+        // Optionally notify user via console or UI
+        console.log("Missing countries:", missingCountries);
+      }
+
+      // Auto-select categories
+      if (data.category_slugs && Array.isArray(data.category_slugs)) {
+        const foundCategoryIds = allCategories
+          .filter(c => data.category_slugs.includes(c.slug))
+          .map(c => c.id);
+        
+        if (foundCategoryIds.length > 0) {
+          setSelectedCategoryIds(foundCategoryIds);
+        }
+
+        // Suggest missing categories (using Name from constant)
+        const missingSlugs = data.category_slugs.filter((slug: string) => 
+          !allCategories.some(c => c.slug === slug)
+        );
+
+        if (missingSlugs.length > 0) {
+          const firstMissingSlug = missingSlugs[0];
+          const definition = CATEGORIES.find(c => c.slug === firstMissingSlug);
+          if (definition) {
+             setNewCategoryName(definition.name);
+          }
+        }
+      }
+
       setFormData({
         title: data.title || "",
         description: data.description || "",
-        country: data.country || "",
         deadline: data.deadline || "",
         startDate: data.start_date || "",
         fundingType: data.funding_type || "UNKNOWN",
         educationLevel: data.education_level || "OTHER",
-        areas: data.areas || "ALL",
         benefits: data.benefits || "",
         requirements: data.requirements || "",
-        duration: data.duracion || "",
+        duration: data.duration || "",
         applyUrl: data.apply_url || "",
         officialUrl: data.official_url || "",
+        isRecommended: false,
       });
 
     } catch (err: any) {
@@ -111,7 +271,11 @@ export default function ScholarshipForm({ initialData, isEditing = false }: Scho
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ 
+          ...formData, 
+          categoryIds: selectedCategoryIds,
+          countryIds: selectedCountryIds 
+        }),
       });
 
       if (!res.ok) {
@@ -171,8 +335,9 @@ export default function ScholarshipForm({ initialData, isEditing = false }: Scho
       {/* Debug Panel: Raw AI Response */}
       {rawResponse && (
         <details className="bg-slate-800 text-slate-100 rounded-xl overflow-hidden">
-          <summary className="px-4 py-3 cursor-pointer hover:bg-slate-700 font-mono text-sm flex items-center gap-2">
-            🔍 Debug: Ver respuesta raw del LLM
+          <summary className="px-4 py-3 cursor-pointer hover:bg-slate-700 font-mono text-sm flex items-center justify-between font-bold text-emerald-400">
+            <span>✨ Datos Extraídos por IA (Haz Clic Para Ver Todo)</span>
+            <span className="text-xs text-slate-400">JSON RAW</span>
           </summary>
           <pre className="p-4 text-xs overflow-x-auto max-h-96 overflow-y-auto border-t border-slate-700">
             {JSON.stringify(rawResponse, null, 2)}
@@ -199,24 +364,139 @@ export default function ScholarshipForm({ initialData, isEditing = false }: Scho
                 placeholder="Ej: Beca Chevening 2026"
               />
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Input
-                  label="País"
-                  name="country"
-                  required
-                  value={formData.country}
-                  onChange={handleChange}
-                  placeholder="Ej: Reino Unido"
-                  leftIcon={<MapPin size={16} />}
+              <div className="flex items-center gap-2 mt-4 p-3 bg-yellow-50 border border-yellow-100 rounded-lg">
+                <input
+                  type="checkbox"
+                  name="isRecommended"
+                  id="isRecommended"
+                  checked={formData.isRecommended}
+                  onChange={(e) => setFormData(prev => ({ ...prev, isRecommended: e.target.checked }))}
+                  className="w-5 h-5 text-emerald-600 rounded border-gray-300 focus:ring-emerald-500 cursor-pointer"
                 />
+                <label htmlFor="isRecommended" className="text-sm font-medium text-gray-700 select-none cursor-pointer flex items-center gap-2">
+                  <Star className="text-yellow-500 fill-yellow-500" size={18} />
+                   Marcar como <strong>Recomendada</strong> (Aparecerá destacada en el listado)
+                </label>
+              </div>
+
+              {/* Country Picker */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <MapPin size={14} className="inline mr-1.5 text-emerald-600" />
+                  País(es)
+                </label>
+
+                {/* Selected + available chips */}
+                <div className="flex flex-wrap gap-2 mb-3">
+                  {allCountries.map((country) => {
+                    const selected = selectedCountryIds.includes(country.id);
+                    return (
+                      <button
+                        key={country.id}
+                        type="button"
+                        onClick={() => toggleCountry(country.id)}
+                        className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium border transition-all ${
+                          selected
+                            ? "bg-emerald-100 text-emerald-700 border-emerald-300 shadow-sm"
+                            : "bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100"
+                        }`}
+                      >
+                        {country.name}
+                        {selected && <X size={14} />}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Create new country */}
+                <div className="flex gap-2 items-end">
+                  <div className="flex-1">
+                    <Input
+                      value={newCountryName}
+                      onChange={(e) => setNewCountryName(e.target.value)}
+                      onKeyDown={(e: React.KeyboardEvent) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          handleCreateCountry();
+                        }
+                      }}
+                      placeholder="Nuevo país..."
+                      leftIcon={<Plus size={16} />}
+                    />
+                  </div>
+                  <Button
+                    type="button"
+                    onClick={handleCreateCountry}
+                    disabled={!newCountryName.trim() || creatingCountry}
+                    isLoading={creatingCountry}
+                  >
+                    <Plus size={16} />
+                    Crear
+                  </Button>
+                </div>
                 
-                <Input
-                  label="Áreas de Estudio"
-                  name="areas"
-                  value={formData.areas}
-                  onChange={handleChange}
-                  placeholder="ENGINEERING, ARTS, o 'ALL'"
-                />
+                {/* Fallback legacy input (hidden or read-only if desired, but kept for debug) */}
+                {/* <div className="mt-2 text-xs text-gray-400">Legacy String: {formData.country}</div> */}
+              </div>
+
+              {/* Category Picker */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <Tag size={14} className="inline mr-1.5 text-emerald-600" />
+                  Categorías
+                </label>
+
+                {/* Selected + available chips */}
+                <div className="flex flex-wrap gap-2 mb-3">
+                  {allCategories.map((cat) => {
+                    const selected = selectedCategoryIds.includes(cat.id);
+                    return (
+                      <button
+                        key={cat.id}
+                        type="button"
+                        onClick={() => toggleCategory(cat.id)}
+                        className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium border transition-all ${
+                          selected
+                            ? "bg-emerald-100 text-emerald-700 border-emerald-300 shadow-sm"
+                            : "bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100"
+                        }`}
+                      >
+                        {cat.name}
+                        {selected && <X size={14} />}
+                      </button>
+                    );
+                  })}
+                  {allCategories.length === 0 && (
+                    <span className="text-sm text-gray-400">Cargando categorías...</span>
+                  )}
+                </div>
+
+                {/* Create new category */}
+                <div className="flex gap-2 items-end">
+                  <div className="flex-1">
+                    <Input
+                      value={newCategoryName}
+                      onChange={(e) => setNewCategoryName(e.target.value)}
+                      onKeyDown={(e: React.KeyboardEvent) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          handleCreateCategory();
+                        }
+                      }}
+                      placeholder="Nueva categoría..."
+                      leftIcon={<Plus size={16} />}
+                    />
+                  </div>
+                  <Button
+                    type="button"
+                    onClick={handleCreateCategory}
+                    disabled={!newCategoryName.trim() || creatingCategory}
+                    isLoading={creatingCategory}
+                  >
+                    <Plus size={16} />
+                    Crear
+                  </Button>
+                </div>
               </div>
 
               <Textarea

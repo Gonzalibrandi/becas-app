@@ -8,7 +8,7 @@ interface RouteParams {
   params: Promise<{ id: string }>;
 }
 
-// GET /api/user/alerts/[id] - Get single alert
+// GET /api/user/alerts/[id] - get an alert by ID
 export async function GET(request: NextRequest, { params }: RouteParams) {
   const auth = await requireUserAuth();
   if (!auth.authenticated || !auth.user) {
@@ -36,7 +36,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   }
 }
 
-// PATCH /api/user/alerts/[id] - Update alert
+// PATCH /api/user/alerts/[id] - update an alert by ID
 export async function PATCH(request: NextRequest, { params }: RouteParams) {
   const auth = await requireUserAuth();
   if (!auth.authenticated || !auth.user) {
@@ -84,7 +84,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
   }
 }
 
-// DELETE /api/user/alerts/[id] - Delete alert
+// DELETE /api/user/alerts/[id] - delete an alert by ID
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   const auth = await requireUserAuth();
   if (!auth.authenticated || !auth.user) {

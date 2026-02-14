@@ -11,8 +11,13 @@ type Category = {
   slug: string;
 };
 
+type Country = {
+  name: string;
+  slug: string;
+};
+
 // Inner component that uses useSearchParams
-function FiltersContent({ countries, categories }: { countries: string[], categories: Category[] }) {
+function FiltersContent({ countries, categories }: { countries: Country[], categories: Category[] }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   
@@ -116,7 +121,7 @@ function FiltersContent({ countries, categories }: { countries: string[], catego
                 >
                   <option value="">Todos los países</option>
                   {countries.map((country) => (
-                    <option key={country} value={country}>{country}</option>
+                    <option key={country.slug} value={country.slug}>{country.name}</option>
                   ))}
                 </select>
               </div>
@@ -207,7 +212,7 @@ function FiltersFallback() {
 }
 
 // Main component wrapped in Suspense
-export default function ScholarshipFilters({ countries, categories }: { countries: string[], categories: Category[] }) {
+export default function ScholarshipFilters({ countries, categories }: { countries: Country[], categories: Category[] }) {
   return (
     <Suspense fallback={<FiltersFallback />}>
       <FiltersContent countries={countries} categories={categories} />

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import prisma from "@/lib/db/prisma";
 import { getFundingInfo, getEducationInfo } from "@/lib/utils/constants";
+import { getDeadlineStatus, getDeadlineStyle } from "@/lib/utils/deadline";
 import { 
   ArrowLeft, 
   Calendar, 
@@ -11,21 +12,44 @@ import {
   CheckCircle,
   BookOpen,
   Target,
-  Share2,
   GraduationCap
 } from "lucide-react";
 import FavoriteButton from "../../_components/FavoriteButton";
+import ShareButton from "./ShareButton";
+import type { Metadata } from "next";
 
 // Force dynamic rendering - page fetches from database
 export const dynamic = 'force-dynamic';
 
+// SEO: Dynamic metadata
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const beca = await getScholarship(slug);
 
+  if (!beca) {
+    return { title: "Beca no encontrada | Becas App" };
+  }
+
+  return {
+    title: `${beca.title} | Becas App`,
+    description: beca.description?.slice(0, 160) || `Información sobre ${beca.title}`,
+    openGraph: {
+      title: beca.title,
+      description: beca.description?.slice(0, 160) || `Beca en ${(beca.countries?.map(c => c.name).join(", ")) || beca.country || "el mundo"}`,
+      type: "article",
+    },
+  };
+}
 
 // Fetch scholarship directly from Prisma by slug
 async function getScholarship(slug: string) {
   try {
     return await prisma.scholarship.findUnique({
       where: { slug },
+      include: {
+        categories: { select: { name: true, slug: true } },
+        countries: { select: { name: true } },
+      },
     });
   } catch (error) {
     console.error("Error fetching scholarship:", error);
@@ -43,8 +67,8 @@ export default async function ScholarshipPage({ params }: { params: Promise<{ sl
 
   const funding = getFundingInfo(beca.fundingType);
   const education = getEducationInfo(beca.educationLevel);
+  const deadlineStatus = getDeadlineStatus(beca.deadline);
   const deadline = beca.deadline ? new Date(beca.deadline) : null;
-  const isExpired = deadline && deadline < new Date();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -76,7 +100,8 @@ export default async function ScholarshipPage({ params }: { params: Promise<{ sl
           <div className="flex flex-wrap gap-2 sm:gap-3">
             <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm font-medium">
               <MapPin size={14} />
-              {beca.country || "Internacional"}
+              <MapPin size={14} />
+              {(beca.countries && beca.countries.length > 0) ? beca.countries.map(c => c.name).join(", ") : (beca.country || "Internacional")}
             </span>
             <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm font-medium">
               {funding.icon} {funding.label}
@@ -84,6 +109,17 @@ export default async function ScholarshipPage({ params }: { params: Promise<{ sl
             <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm font-medium">
               {education.icon} {education.label}
             </span>
+            {deadlineStatus.label && (
+              <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold border ${getDeadlineStyle(deadlineStatus.color)}`}>
+                {deadlineStatus.urgent && (
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-current opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-current" />
+                  </span>
+                )}
+                {deadlineStatus.label}
+              </span>
+            )}
           </div>
         </div>
       </div>
@@ -147,22 +183,23 @@ export default async function ScholarshipPage({ params }: { params: Promise<{ sl
               </div>
             )}
 
-            {/* Areas Card */}
-            {beca.areas && (
+            {/* Categories Card (replaces old Areas) */}
+            {beca.categories && beca.categories.length > 0 && (
               <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8">
                 <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2 mb-4">
                   <GraduationCap size={22} className="text-emerald-600" />
-                  Áreas de Estudio
+                  Categorías
                 </h2>
                 <div className="flex flex-wrap gap-2">
-                  {beca.areas.split('\n').filter(line => line.trim()).map((area, index) => (
-                    <span 
-                      key={index} 
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-50 text-purple-700 rounded-lg text-sm font-medium border border-purple-100"
+                  {beca.categories.map((cat) => (
+                    <Link
+                      key={cat.slug}
+                      href={`/?category=${cat.slug}`}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-50 text-purple-700 rounded-lg text-sm font-medium border border-purple-100 hover:bg-purple-100 hover:border-purple-200 transition-colors"
                     >
                       <BookOpen size={14} />
-                      {area.trim()}
-                    </span>
+                      {cat.name}
+                    </Link>
                   ))}
                 </div>
               </div>
@@ -182,28 +219,28 @@ export default async function ScholarshipPage({ params }: { params: Promise<{ sl
                   <Calendar size={14} />
                   Fecha límite
                 </p>
-                <p className={`text-2xl font-bold ${isExpired ? 'text-red-600' : 'text-gray-900'}`}>
+                <p className={`text-2xl font-bold ${deadlineStatus.expired ? 'text-red-600' : 'text-gray-900'}`}>
                   {deadline 
                     ? deadline.toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' })
                     : 'Sin fecha especificada'
                   }
                 </p>
-                {isExpired && (
-                  <span className="inline-flex items-center gap-1 mt-2 px-2 py-1 bg-red-100 text-red-700 rounded-lg text-xs font-semibold">
-                    ⚠️ Fecha vencida
+                {deadlineStatus.label && (
+                  <span className={`inline-flex items-center gap-1 mt-2 px-2 py-1 rounded-lg text-xs font-semibold border ${getDeadlineStyle(deadlineStatus.color)}`}>
+                    {deadlineStatus.urgent && "⚡ "}{deadlineStatus.label}
                   </span>
                 )}
               </div>
 
               {/* Duration */}
-              {beca.duracion && (
+              {beca.duration && (
                 <div className="mb-6 pb-6 border-b border-gray-100">
                   <p className="text-sm text-gray-500 font-medium mb-1 flex items-center gap-1.5">
                     <Clock size={14} />
                     Duración
                   </p>
                   <p className="text-lg font-semibold text-gray-900">
-                    {beca.duracion}
+                    {beca.duration}
                   </p>
                 </div>
               )}
@@ -237,10 +274,7 @@ export default async function ScholarshipPage({ params }: { params: Promise<{ sl
               {/* Action buttons */}
               <div className="flex gap-3 mt-4">
                 <FavoriteButton scholarshipId={beca.id} />
-                <button className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border border-gray-200 text-gray-500 hover:text-blue-500 hover:border-blue-200 hover:bg-blue-50 transition-all">
-                  <Share2 size={18} />
-                  <span className="text-sm font-medium">Compartir</span>
-                </button>
+                <ShareButton title={beca.title} />
               </div>
             </div>
 
@@ -252,7 +286,7 @@ export default async function ScholarshipPage({ params }: { params: Promise<{ sl
                   <span className="w-8 h-8 bg-white rounded-lg flex items-center justify-center text-lg shadow-sm">🌍</span>
                   <div>
                     <p className="text-gray-500 text-xs">País</p>
-                    <p className="font-medium">{beca.country || "Internacional"}</p>
+                    <p className="font-medium">{(beca.countries && beca.countries.length > 0) ? beca.countries.map(c => c.name).join(", ") : (beca.country || "Internacional")}</p>
                   </div>
                 </li>
                 <li className="flex items-center gap-3 text-gray-700">

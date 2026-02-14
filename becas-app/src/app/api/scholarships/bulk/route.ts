@@ -15,7 +15,7 @@ interface BulkRequest {
   }
 }
 
-// POST /api/scholarships/bulk - Bulk actions (protected)
+// POST /api/scholarships/bulk - bulk actions on scholarships
 export async function POST(request: NextRequest) {
   // Verify authentication
   const auth = await requireAuth()

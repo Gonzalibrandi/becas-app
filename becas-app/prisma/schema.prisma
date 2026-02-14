@@ -34,7 +34,6 @@ model Scholarship {
   sourceUrl      String    @map("source_url")
   
   // Key data
-  country        String
   deadline       DateTime?
   startDate      DateTime? @map("start_date")
   
@@ -43,23 +42,30 @@ model Scholarship {
   educationLevel String    @default("OTHER") @map("education_level")
   
   // Rich content (legacy field - will be migrated to categories)
-  areas          String    @default("")
   benefits       String    @default("")
   requirements   String    @default("")
-  duracion       String    @default("")
+  duration       String    @default("")
   
   // Relations
-  categories     Category[]           // Many-to-Many with Category
+  categories     Category[] @relation("ScholarshipCategories")          // Many-to-Many with Category
   savedByUsers   User[]    @relation("SavedScholarships") // Many-to-Many favorites
+  countries      Country[] @relation("ScholarshipCountries")
   
   // Admin
   status         String    @default("DRAFT")
   rawData        String    @default("{}") @map("raw_data")
   adminNotes     String?   @map("admin_notes")
+  isRecommended  Boolean   @default(false) @map("is_recommended")
   
   // Timestamps
   createdAt      DateTime  @default(now()) @map("created_at")
   updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  // Indexes for query optimization
+  @@index([status, createdAt])
+  @@index([fundingType])
+  @@index([educationLevel])
+  @@index([deadline])
 
   @@map("scholarships")
 }
@@ -70,7 +76,7 @@ model Category {
   slug          String        @unique  // "ingenieria"
   
   // Relations
-  scholarships  Scholarship[]
+  scholarships  Scholarship[] @relation("ScholarshipCategories")
   
   // Timestamps
   createdAt     DateTime      @default(now()) @map("created_at")
@@ -139,5 +145,39 @@ model ScholarshipAlert {
   createdAt   DateTime        @default(now()) @map("created_at")
   updatedAt   DateTime        @updatedAt @map("updated_at")
 
+  @@index([userId])
+  @@index([isActive])
+
   @@map("scholarship_alerts")
 }
+
+// ============================================
+// EMAILS
+// ============================================
+
+model Email {
+  id           String   @id @default(uuid())
+  to           String
+  subject      String
+  body         String
+  sentAt       DateTime @default(now()) @map("sent_at")
+  
+  @@map("emails")
+}
+
+// ============================================
+// COUNTRIES
+// ============================================
+
+model Country {
+  id           String    @id @default(uuid())
+  name         String    @unique
+  isoCode      String?   @unique
+  slug         String    @unique
+  
+  // Relations
+  scholarships Scholarship[] @relation("ScholarshipCountries")
+
+  @@map("countries")
+}
+

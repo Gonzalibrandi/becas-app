@@ -16,7 +16,7 @@ export default function HelpPage() {
     {
       icon: Mail,
       title: "Contacto",
-      description: "¿Tenés dudas? Escribinos a soporte@becasapp.com",
+      description: `¿Tenés dudas? Escribinos a librandigonzalo@gmail.com`,
     },
   ];
 

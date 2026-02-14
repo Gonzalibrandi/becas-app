@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { validateUserCredentials, createUserSession } from '@/lib/auth/user';
 
+// POST /api/auth/user/login - log in as user
 export async function POST(request: Request) {
   try {
     const body = await request.json();

@@ -3,6 +3,7 @@ import { destroySession } from '@/lib/auth/admin'
 
 export const dynamic = 'force-dynamic'
 
+// POST /api/auth/admin/logout - log out as admin
 export async function POST() {
   try {
     await destroySession()

@@ -37,6 +37,7 @@ function generateSlug(text: string): string {
   return `${slug}-${Math.floor(Date.now() / 1000)}`;
 }
 
+// POST /api/admin/scrape - Realizar scraping de una URL
 export async function POST(request: NextRequest) {
   try {
     const { url } = await request.json();
@@ -116,7 +117,7 @@ export async function POST(request: NextRequest) {
 
     // Build category list for the prompt
     const categoryList = CATEGORIES.map(cat => 
-      `  - "${cat.slug}": ${cat.name} (ej: ${cat.examples.slice(0, 2).join(', ')})`
+      `  - "${cat.slug}": ${cat.name} (keywords: ${cat.keywords.slice(0, 8).join(', ')})`
     ).join('\n');
 
     const prompt = `
@@ -174,6 +175,7 @@ URL de Origen: {source_url}
 
 8. "category_slugs" (array de strings):
    - Asigna entre 1 y 5 categorías que mejor representen la beca
+   - PRIORIZA la asignación múltiple si la beca toca varios temas.
    - USA SOLO estos slugs exactos:
 ${categoryList}
 
@@ -199,7 +201,7 @@ ${categoryList}
     - Cada requisito en una línea separada, sin viñetas ni guiones
     - Si no hay info: ""
 
-11. "duracion" (string, max 100 chars): 
+11. "duration" (string, max 100 chars): 
     - Duración de la beca
     - Ejemplos: "1 año", "6 meses", "2 semestres", "3-12 meses"
     - Si no hay info: ""
@@ -273,6 +275,18 @@ ${textContent}
     data.source_url = url;
     data.slug = generateSlug(data.title || 'beca-sin-titulo');
     data.raw_data = JSON.stringify({ ai_extracted: true, method: 'native-ts' });
+
+    // Add debug info (requested by user)
+    (data as any).debug = {
+      textContent: textContent,
+      linksFound: linksFound
+    };
+
+    // Add debug info (requested by user)
+    (data as any).debug = {
+      textContent: textContent,
+      linksFound: linksFound
+    };
 
     return NextResponse.json(data);
 

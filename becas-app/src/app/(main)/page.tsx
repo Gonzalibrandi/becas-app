@@ -2,32 +2,38 @@ import prisma from "@/lib/db/prisma";
 import { GraduationCap, X, Search, Sparkles, TrendingUp } from "lucide-react";
 import ScholarshipFilters from "./_components/ScholarshipFilters";
 import ScholarshipCard from "./_components/ScholarshipCard";
+import Pagination from "./_components/Pagination";
 import { Button, Card, Badge, SectionHeader, Title, Subtitle } from "@/components/ui";
 import { getFundingInfo, getEducationInfo } from "@/lib/utils/constants";
 
 // Force dynamic rendering - page fetches from database
 export const dynamic = 'force-dynamic';
 
+const ITEMS_PER_PAGE = 12;
+
 type FilterParams = {
   search?: string;
   country?: string;
   funding?: string;
   level?: string;
-  category?: string; // (uses slug)
+  category?: string;
+  page?: string;
 };
 
 // Get unique countries for filter dropdown
-async function getCountries(): Promise<string[]> {
+// Get countries with at least one published scholarship
+async function getCountries(): Promise<{ name: string; slug: string }[]> {
   try {
-    const scholarships = await prisma.scholarship.findMany({
-      where: { status: "PUBLISHED" },
-      select: { country: true },
-      distinct: ["country"],
+    const countries = await prisma.country.findMany({
+      where: {
+        scholarships: {
+          some: { status: "PUBLISHED" }
+        }
+      },
+      select: { name: true, slug: true },
+      orderBy: { name: 'asc' }
     });
-    return scholarships
-      .map(s => s.country)
-      .filter((c): c is string => Boolean(c))
-      .sort();
+    return countries;
   } catch {
     return [];
   }
@@ -46,45 +52,71 @@ async function getCategories(): Promise<{ name: string; slug: string }[]> {
   }
 }
 
-// Fetch scholarships with filters
+// Fetch scholarships with filters and pagination
 async function getScholarships(filters: FilterParams) {
+  const page = Math.max(1, parseInt(filters.page || '1', 10) || 1);
+  const skip = (page - 1) * ITEMS_PER_PAGE;
+
   try {
+    // 1. Start with base condition: Only show published scholarships
     const conditions: object[] = [{ status: "PUBLISHED" }];
 
     if (filters.search) {
       conditions.push({
         OR: [
-          { title: { contains: filters.search } },
-          { country: { contains: filters.search } },
-          { categories: { some: { name: { contains: filters.search } } } },
+          { title: { contains: filters.search, mode: 'insensitive' as const } },
+          { description: { contains: filters.search, mode: 'insensitive' as const } },
+          { countries: { some: { name: { contains: filters.search, mode: 'insensitive' as const } } } }, // Updated for relational country search
+          { categories: { some: { name: { contains: filters.search, mode: 'insensitive' as const } } } },
         ],
       });
     }
 
-    if (filters.country) conditions.push({ country: filters.country });
+    // 2. Add filters if selected
+    // Note: We use 'some' because these are Many-to-Many relations
+    if (filters.country) conditions.push({ countries: { some: { slug: filters.country } } });
     if (filters.funding) conditions.push({ fundingType: filters.funding });
     if (filters.level) conditions.push({ educationLevel: filters.level });
-    // Filter by category slug using relation
     if (filters.category) conditions.push({ categories: { some: { slug: filters.category } } });
 
-    return await prisma.scholarship.findMany({
-      where: { AND: conditions },
-      select: {
-        id: true,
-        title: true,
-        slug: true,
-        country: true,
-        deadline: true,
-        fundingType: true,
-        educationLevel: true,
-        description: true,
-        categories: { select: { name: true, slug: true } },
-      },
-      orderBy: { deadline: "asc" },
-    });
+    // 3. Create the WHERE clause
+    const whereClause = { AND: conditions };
+
+    const [data, total] = await Promise.all([
+      prisma.scholarship.findMany({
+        where: whereClause,
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          deadline: true,
+          fundingType: true,
+          educationLevel: true,
+          description: true,
+          isRecommended: true,
+          categories: { select: { name: true, slug: true } },
+          countries: { select: { name: true } },
+        },
+        orderBy: [
+          { isRecommended: "desc" },
+          { deadline: "asc" }, 
+          { id: "asc" }
+        ],
+        take: ITEMS_PER_PAGE,
+        skip,
+      }),
+      prisma.scholarship.count({ where: whereClause }),
+    ]);
+
+    return {
+      data,
+      total,
+      page,
+      totalPages: Math.ceil(total / ITEMS_PER_PAGE),
+    };
   } catch (error) {
     console.error("Error fetching scholarships:", error);
-    return [];
+    return { data: [], total: 0, page: 1, totalPages: 0 };
   }
 }
 
@@ -94,7 +126,7 @@ export default async function Home({
   searchParams: Promise<FilterParams>;
 }) {
   const params = await searchParams;
-  const scholarships = await getScholarships(params);
+  const { data: scholarships, total, page, totalPages } = await getScholarships(params);
   const countries = await getCountries();
   const categories = await getCategories();
   
@@ -115,7 +147,7 @@ export default async function Home({
           <div className="relative text-center">
             <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 text-white/90 text-sm mb-4">
               <Sparkles size={16} />
-              <span>{scholarships.length} becas disponibles</span>
+              <span>{total} becas disponibles</span>
             </div>
             
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4">
@@ -160,7 +192,7 @@ export default async function Home({
             {hasFilters ? "Resultados" : "Todas las becas"}
           </h2>
           <p className="text-gray-500">
-            {scholarships.length} beca{scholarships.length !== 1 ? "s" : ""} encontrada{scholarships.length !== 1 ? "s" : ""}
+            {total} beca{total !== 1 ? "s" : ""} encontrada{total !== 1 ? "s" : ""}
             {params.search ? ` para "${params.search}"` : ""}
           </p>
         </div>
@@ -184,20 +216,22 @@ export default async function Home({
       {hasFilters && (
         <div className="flex flex-wrap gap-2">
           {params.country && (
-            <Badge color="emerald" icon="📍">{params.country}</Badge>
+            <Badge color="emerald" size="lg" icon="📍">
+              {countries.find(c => c.slug === params.country)?.name || params.country}
+            </Badge>
           )}
           {params.funding && (
-            <Badge color="amber" icon={getFundingInfo(params.funding).icon}>
+            <Badge color="amber" size="lg" icon={getFundingInfo(params.funding).icon}>
               {getFundingInfo(params.funding).label}
             </Badge>
           )}
           {params.level && (
-            <Badge color="purple" icon={getEducationInfo(params.level).icon}>
+            <Badge color="purple" size="lg" icon={getEducationInfo(params.level).icon}>
               {getEducationInfo(params.level).label}
             </Badge>
           )}
           {params.category && (
-            <Badge color="blue" icon="🎓">
+            <Badge color="blue" size="lg" icon="🎓">
               {categories.find(c => c.slug === params.category)?.name || params.category}
             </Badge>
           )}
@@ -210,6 +244,14 @@ export default async function Home({
           <ScholarshipCard key={beca.id} scholarship={beca} />
         ))}
       </div>
+
+      {/* Pagination */}
+      <Pagination
+        currentPage={page}
+        totalPages={totalPages}
+        totalItems={total}
+        itemsPerPage={ITEMS_PER_PAGE}
+      />
 
       {/* Empty State */}
       {scholarships.length === 0 && (

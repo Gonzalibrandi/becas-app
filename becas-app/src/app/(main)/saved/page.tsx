@@ -19,12 +19,12 @@ async function getFavorites(userId: string) {
             id: true,
             title: true,
             slug: true,
-            country: true,
             deadline: true,
             fundingType: true,
             educationLevel: true,
             description: true,
             categories: { select: { name: true, slug: true } },
+            countries: { select: { name: true } },
           }
         }
       }

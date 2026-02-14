@@ -50,10 +50,12 @@ async function getRecentScholarships() {
         id: true,
         title: true,
         status: true,
-        country: true,
+        countries: {
+          select: { name: true }
+        }
       },
     });
-  } catch (error) {
+  } catch (error: any) { // Explicitly type error as any
     console.error("Error getting scholarships:", error);
     return [];
   }
@@ -201,7 +203,7 @@ export default async function AdminDashboard() {
             </Link>
           </div>
           <div className="divide-y divide-gray-50">
-            {recent.map((scholarship) => (
+            {recent.map((scholarship: any) => (
               <Link 
                 key={scholarship.id}
                 href={`/admin/scholarships/${scholarship.id}`}
@@ -214,7 +216,9 @@ export default async function AdminDashboard() {
                     </div>
                     <div>
                       <p className="font-semibold text-gray-900">{scholarship.title}</p>
-                      <p className="text-sm text-gray-500 mt-0.5">📍 {scholarship.country}</p>
+                      <p className="text-sm text-gray-500 mt-0.5">
+                        📍 {scholarship.countries[0]?.name || "Sin país"}
+                      </p>
                     </div>
                   </div>
                   <StatusBadge status={scholarship.status} />

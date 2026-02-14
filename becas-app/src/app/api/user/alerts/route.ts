@@ -4,7 +4,7 @@ import { requireUserAuth } from '@/lib/auth/user';
 
 export const dynamic = 'force-dynamic';
 
-// GET /api/user/alerts - List user's alerts
+// GET /api/user/alerts - get user alerts list
 export async function GET() {
   const auth = await requireUserAuth();
   if (!auth.authenticated || !auth.user) {
@@ -24,7 +24,7 @@ export async function GET() {
   }
 }
 
-// POST /api/user/alerts - Create new alert
+// POST /api/user/alerts - create a new alert
 export async function POST(request: NextRequest) {
   const auth = await requireUserAuth();
   if (!auth.authenticated || !auth.user) {

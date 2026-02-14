@@ -15,7 +15,7 @@ const GOOGLE_SHEETS_URL =
 
 export async function fetchGoogleSheetData(limit?: number): Promise<SheetScholarship[]> {
   try {
-    // Revalidación cada hora (3600s)
+    // Revalidation every hour (3600s)
     const res = await fetch(GOOGLE_SHEETS_URL, { next: { revalidate: 3600 } });
     
     if (!res.ok) throw new Error("Failed to fetch sheet");
@@ -30,30 +30,30 @@ export async function fetchGoogleSheetData(limit?: number): Promise<SheetScholar
     
     const scholarships: SheetScholarship[] = [];
     
-    // 🔥 USAMOS UN SET PARA DEDUPLICAR (O(1) vs O(N^2))
+    // Use a set to deduplicate (O(1) vs O(N^2))
     const seenUrls = new Set<string>();
 
     rows.forEach((row: string[], index: number) => {
-      // 1. Validaciones básicas (Saltar headers y filas rotas)
+      // 1. Basic validations (Skip headers and broken rows)
       if (index < 2) return; 
       if (!row || row.length < 7) return; 
       
       const title = row[4];
       const rawUrl = row[6];
       
-      // 2. Filtro estricto de vacíos
+      // 2. Strict filter for empty values
       if (!title || !rawUrl || rawUrl.trim() === "") return;
       
-      // 3. Normalización (Clave para deduplicar)
+      // 3. Normalization (Key for deduplication)
       const cleanUrl = rawUrl.trim();
       const normalizationKey = cleanUrl.toLowerCase();
 
-      // 4. Chequeo de duplicados
+      // 4. Deduplication check
       if (seenUrls.has(normalizationKey)) {
-        return; // Ya existe, la ignoramos
+        return; // Already exists, ignore it
       }
       
-      // 5. Guardamos
+      // 5. Save 
       seenUrls.add(normalizationKey);
       
       scholarships.push({
@@ -62,12 +62,12 @@ export async function fetchGoogleSheetData(limit?: number): Promise<SheetScholar
         countriesList: row[3] || "",
         title: title,
         duration: row[5] || "",
-        detailUrl: cleanUrl, // Guardamos la URL original bonita
+        detailUrl: cleanUrl, // Save the original URL
         rowIndex: index
       });
     });
     
-    console.log(`✅ Extracción Total: ${scholarships.length} becas únicas encontradas.`);
+    console.log(`✅ Total Extraction: ${scholarships.length} unique scholarships found.`);
     return scholarships;
 
   } catch (error) {

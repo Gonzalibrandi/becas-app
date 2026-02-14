@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { registerUser, createUserSession } from '@/lib/auth/user';
 import prisma from '@/lib/db/prisma';
 
+// POST /api/auth/user/register - register a new user
 export async function POST(request: Request) {
   try {
     const body = await request.json();

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { destroyUserSession } from '@/lib/auth/user';
 
+// POST /api/auth/user/logout - log out as user
 export async function POST() {
   try {
     await destroyUserSession();

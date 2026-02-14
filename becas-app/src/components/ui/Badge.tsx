@@ -1,7 +1,7 @@
 import { HTMLAttributes, forwardRef } from "react";
 
 type BadgeColor = "emerald" | "amber" | "blue" | "red" | "purple" | "gray";
-type BadgeSize = "sm" | "md";
+type BadgeSize = "sm" | "md" | "lg";
 
 type BadgeProps = {
   color?: BadgeColor;
@@ -21,6 +21,7 @@ const colors: Record<BadgeColor, string> = {
 const sizes: Record<BadgeSize, string> = {
   sm: "px-2 py-0.5 text-xs",
   md: "px-2.5 py-1 text-xs",
+  lg: "px-3 py-1.5 text-sm",
 };
 
 const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
@@ -46,7 +47,7 @@ const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
 
 Badge.displayName = "Badge";
 
-// Preset badges for common statuses
+// Predefined badges for common states
 function StatusBadge({ status }: { status: string }) {
   const statusMap: Record<string, { color: BadgeColor; label: string }> = {
     DRAFT: { color: "amber", label: "Borrador" },

@@ -14,12 +14,13 @@ async function getScholarships(searchParams: { status?: string; search?: string 
   
   if (searchParams.search) {
     where.OR = [
-      { title: { contains: searchParams.search } },
-      { country: { contains: searchParams.search } },
+      { title: { contains: searchParams.search, mode: 'insensitive' } },
+      { countries: { some: { name: { contains: searchParams.search, mode: 'insensitive' } } } },
     ];
   }
   
-  const scholarships = await prisma.scholarship.findMany({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const scholarships = await (prisma.scholarship as any).findMany({
     where,
     orderBy: { createdAt: "desc" },
     select: {
@@ -27,16 +28,20 @@ async function getScholarships(searchParams: { status?: string; search?: string 
       title: true,
       slug: true,
       status: true,
-      country: true,
+      countries: {
+        select: { name: true }
+      },
       deadline: true,
       educationLevel: true,
       createdAt: true,
     },
   });
 
-  // Serialize dates to strings for client component
-  return scholarships.map(s => ({
+  // Serialize dates and map country
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return scholarships.map((s: any) => ({
     ...s,
+    country: s.countries?.[0]?.name || 'Internacional',
     deadline: s.deadline?.toISOString() ?? null,
   }));
 }

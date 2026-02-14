@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth/user';
 
+// GET /api/auth/user/me - get current user info
 export async function GET() {
   try {
     const user = await getCurrentUser();

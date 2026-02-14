@@ -10,6 +10,7 @@ export function proxy(request: NextRequest) {
   const protectedPatterns = [
     { pattern: '/api/scholarships/bulk', methods: ['POST', 'DELETE'] },
     { pattern: '/api/scholarships', methods: ['POST'] },
+    { pattern: '/api/scholarships/alert', methods: ['POST', 'DELETE'] },
   ]
   
   // Check if this is a protected route

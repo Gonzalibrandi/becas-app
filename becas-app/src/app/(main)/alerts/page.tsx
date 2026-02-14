@@ -6,6 +6,7 @@ import { Bell } from "lucide-react";
 
 export const dynamic = 'force-dynamic';
 
+// Get alert data
 async function getAlertData() {
   const [categories, scholarships] = await Promise.all([
     prisma.category.findMany({
@@ -27,6 +28,7 @@ async function getAlertData() {
   return { categories, countries };
 }
 
+// Alerts page
 export default async function AlertsPage() {
   const user = await getCurrentUser();
 

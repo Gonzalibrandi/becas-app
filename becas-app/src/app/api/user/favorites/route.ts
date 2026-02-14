@@ -4,7 +4,7 @@ import { requireUserAuth } from '@/lib/auth/user';
 
 export const dynamic = 'force-dynamic';
 
-// GET /api/user/favorites - List user's saved scholarships
+// GET /api/user/favorites - get user's favorite scholarships list
 export async function GET(request: NextRequest) {
   const auth = await requireUserAuth();
   if (!auth.authenticated || !auth.user) {
@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST /api/user/favorites - Add scholarship to favorites
+// POST /api/user/favorites - Agregar beca a favoritos
 export async function POST(request: NextRequest) {
   const auth = await requireUserAuth();
   if (!auth.authenticated || !auth.user) {
@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// DELETE /api/user/favorites - Remove scholarship from favorites
+// DELETE /api/user/favorites - delete a scholarship from favorites
 export async function DELETE(request: NextRequest) {
   const auth = await requireUserAuth();
   if (!auth.authenticated || !auth.user) {

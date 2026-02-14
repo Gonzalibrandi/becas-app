@@ -43,7 +43,7 @@ async function getUserStats(userId: string) {
         status: "PUBLISHED"
       }
     }),
-    // Count alerts using the correct model name
+    // Count alerts using the scholarshipAlert table looking for the userId
     prisma.scholarshipAlert.count({
       where: { userId }
     })
@@ -56,6 +56,7 @@ async function getUserStats(userId: string) {
   };
 }
 
+// Profile page
 export default async function ProfilePage() {
   const user = await getCurrentUser();
 

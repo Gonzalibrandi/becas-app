@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db/prisma';
 import { requireAuth } from '@/lib/auth/admin';
 
-// POST /api/scholarships/check
+// POST /api/scholarships/check - check existing scholarships
 // Body: { urls: string[], titles: string[] }
 // Returns: { existingUrls: string[], existingSlugs: string[] }
 export async function POST(request: NextRequest) {
