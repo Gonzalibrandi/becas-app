@@ -189,7 +189,7 @@ export default function ScholarshipForm({ initialData, isEditing = false }: Scho
       // Auto-select countries if they match existing ones
       const scrapedCountries = (data.country || "").split(",").map((c: string) => c.trim()).filter(Boolean);
       const foundCountryIds = allCountries
-        .filter(c => scrapedCountries.some(sc => 
+        .filter(c => scrapedCountries.some((sc: string) => 
           sc.toLowerCase() === c.name.toLowerCase() || 
           sc.toLowerCase() === c.slug.toLowerCase()
         ))
@@ -200,7 +200,7 @@ export default function ScholarshipForm({ initialData, isEditing = false }: Scho
       }
 
       // Check for missing countries
-      const missingCountries = scrapedCountries.filter(sc => 
+      const missingCountries = scrapedCountries.filter((sc: string) => 
         !allCountries.some(c => 
           c.name.toLowerCase() === sc.toLowerCase() || 
           c.slug.toLowerCase() === sc.toLowerCase()
