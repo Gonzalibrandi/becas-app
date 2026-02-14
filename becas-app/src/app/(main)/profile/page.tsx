@@ -9,22 +9,23 @@ export const dynamic = 'force-dynamic';
 
 // Get categories and countries for alerts
 async function getAlertData() {
-  const [categories, scholarships] = await Promise.all([
+  const [categories, activeCountries] = await Promise.all([
     prisma.category.findMany({
       orderBy: { name: 'asc' },
       select: { name: true, slug: true }
     }),
-    prisma.scholarship.findMany({
-      where: { status: "PUBLISHED" },
-      select: { country: true },
-      distinct: ["country"],
+    prisma.country.findMany({
+      where: {
+        scholarships: {
+          some: { status: "PUBLISHED" }
+        }
+      },
+      orderBy: { name: 'asc' },
+      select: { name: true }
     })
   ]);
 
-  const countries = scholarships
-    .map(s => s.country)
-    .filter((c): c is string => Boolean(c))
-    .sort();
+  const countries = activeCountries.map(c => c.name);
 
   return { categories, countries };
 }
