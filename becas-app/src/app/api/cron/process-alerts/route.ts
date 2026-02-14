@@ -62,7 +62,9 @@ export async function GET(request: Request) {
         select: {
           title: true,
           slug: true,
-          country: true,
+          countries: {
+            select: { name: true }
+          },
           deadline: true,
           fundingType: true,
         },
@@ -76,7 +78,7 @@ export async function GET(request: Request) {
       }
 
       // Send email
-      const html = buildAlertEmailHtml(alert.name, matches);
+      const html = buildAlertEmailHtml(alert.name, matches as any[]);
       const success = await sendEmail({
         to: alert.user.email,
         subject: `🎓 ${matches.length} nueva${matches.length !== 1 ? "s" : ""} beca${matches.length !== 1 ? "s" : ""} — ${alert.name}`,
