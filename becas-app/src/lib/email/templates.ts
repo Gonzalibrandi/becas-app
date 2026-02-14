@@ -1,7 +1,7 @@
 type Scholarship = {
   title: string;
   slug: string;
-  country: string | null;
+  countries: { name: string }[];
   deadline: Date | null;
   fundingType: string;
 };
@@ -22,7 +22,7 @@ export function buildAlertEmailHtml(
             ${s.title}
           </a>
           <div style="margin-top: 6px; font-size: 13px; color: #6b7280;">
-            📍 ${s.country || "Internacional"} · 
+            📍 ${s.countries && s.countries.length > 0 ? s.countries.map((c) => c.name).join(", ") : "Internacional"} · 
             ${s.deadline ? `📅 ${new Date(s.deadline).toLocaleDateString("es-AR", { day: "numeric", month: "long", year: "numeric" })}` : "Sin fecha límite"}
           </div>
         </td>
