@@ -35,7 +35,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     description: beca.description?.slice(0, 160) || `Información sobre ${beca.title}`,
     openGraph: {
       title: beca.title,
-      description: beca.description?.slice(0, 160) || `Beca en ${(beca.countries?.map(c => c.name).join(", ")) || beca.country || "el mundo"}`,
+      description: beca.description?.slice(0, 160) || `Beca en ${(beca.countries?.map(c => c.name).join(", ")) || "el mundo"}`,
       type: "article",
     },
   };
@@ -101,7 +101,7 @@ export default async function ScholarshipPage({ params }: { params: Promise<{ sl
             <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm font-medium">
               <MapPin size={14} />
               <MapPin size={14} />
-              {(beca.countries && beca.countries.length > 0) ? beca.countries.map(c => c.name).join(", ") : (beca.country || "Internacional")}
+              {(beca.countries && beca.countries.length > 0) ? beca.countries.map(c => c.name).join(", ") : "Internacional"}
             </span>
             <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm font-medium">
               {funding.icon} {funding.label}
@@ -286,7 +286,7 @@ export default async function ScholarshipPage({ params }: { params: Promise<{ sl
                   <span className="w-8 h-8 bg-white rounded-lg flex items-center justify-center text-lg shadow-sm">🌍</span>
                   <div>
                     <p className="text-gray-500 text-xs">País</p>
-                    <p className="font-medium">{(beca.countries && beca.countries.length > 0) ? beca.countries.map(c => c.name).join(", ") : (beca.country || "Internacional")}</p>
+                    <p className="font-medium">{(beca.countries && beca.countries.length > 0) ? beca.countries.map(c => c.name).join(", ") : "Internacional"}</p>
                   </div>
                 </li>
                 <li className="flex items-center gap-3 text-gray-700">
